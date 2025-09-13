@@ -93,7 +93,7 @@ export default function HomePage() {
               <CardHeader className="pb-3">
                 <TreePine className="h-8 w-8 text-primary mx-auto mb-2" />
                 <CardTitle className="text-2xl font-bold text-primary">
-                  {stats.totalSaplings.toLocaleString()}
+                  {stats?.totalSaplings?.toLocaleString() || '0'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -104,7 +104,7 @@ export default function HomePage() {
             <Card className="text-center">
               <CardHeader className="pb-3">
                 <Recycle className="h-8 w-8 text-secondary mx-auto mb-2" />
-                <CardTitle className="text-2xl font-bold text-secondary">{stats.totalWasteSaved} kg</CardTitle>
+                <CardTitle className="text-2xl font-bold text-secondary">{stats?.totalWasteSaved || 0} kg</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Waste Saved</p>
@@ -114,7 +114,7 @@ export default function HomePage() {
             <Card className="text-center">
               <CardHeader className="pb-3">
                 <Users className="h-8 w-8 text-accent mx-auto mb-2" />
-                <CardTitle className="text-2xl font-bold text-accent">{stats.totalStudents.toLocaleString()}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-accent">{stats?.totalStudents?.toLocaleString() || '0'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Active Students</p>
@@ -124,7 +124,7 @@ export default function HomePage() {
             <Card className="text-center">
               <CardHeader className="pb-3">
                 <Trophy className="h-8 w-8 text-primary mx-auto mb-2" />
-                <CardTitle className="text-2xl font-bold text-primary">{stats.totalTasks}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-primary">{stats?.totalTasks || 0}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">Tasks Completed</p>

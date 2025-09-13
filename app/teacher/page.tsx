@@ -62,24 +62,24 @@ function TeacherDashboard() {
   const [isReviewing, setIsReviewing] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const currentUser = getCurrentUserFromSession()
-        const allTasks = await getTasks()
-        const allSubmissions = await getSubmissions()
-        const allUsers = await getUsers()
-        const studentUsers = allUsers.filter((u) => u.role === "student")
+  const loadData = async () => {
+    try {
+      const currentUser = getCurrentUserFromSession()
+      const allTasks = await getTasks()
+      const allSubmissions = await getSubmissions()
+      const allUsers = await getUsers()
+      const studentUsers = allUsers.filter((u) => u.role === "student")
 
-        setUser(currentUser)
-        setTasks(allTasks)
-        setSubmissions(allSubmissions)
-        setStudents(studentUsers)
-      } catch (error) {
-        console.error('Error loading teacher data:', error)
-      }
+      setUser(currentUser)
+      setTasks(allTasks)
+      setSubmissions(allSubmissions)
+      setStudents(studentUsers)
+    } catch (error) {
+      console.error('Error loading teacher data:', error)
     }
+  }
 
+  useEffect(() => {
     loadData()
   }, [])
 
@@ -137,11 +137,7 @@ function TeacherDashboard() {
       }
 
       // Refresh data
-      const updatedSubmissions = await getSubmissions()
-      const updatedUsers = await getUsers()
-      const updatedStudents = updatedUsers.filter((u) => u.role === "student")
-      setSubmissions(updatedSubmissions)
-      setStudents(updatedStudents)
+      await loadData()
       setSelectedSubmission(null)
       setReviewComment("")
     } catch (error) {
@@ -722,6 +718,19 @@ function TeacherDashboard() {
                                 </p>
                               )}
                             </div>
+
+                            {selectedSubmission.evidence && selectedSubmission.evidence.startsWith('http') && (
+                              <div>
+                                <label className="text-sm font-medium">Evidence Image</label>
+                                <div className="mt-2">
+                                  <img
+                                    src={selectedSubmission.evidence}
+                                    alt="Task evidence"
+                                    className="w-full h-48 object-cover rounded-lg border"
+                                  />
+                                </div>
+                              </div>
+                            )}
 
                             {selectedSubmission.description && (
                               <div>

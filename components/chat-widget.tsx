@@ -25,7 +25,21 @@ export default function ChatWidget() {
     }
   ])
   const [input, setInput] = useState("")
+  const [suggestedPrompts, setSuggestedPrompts] = useState([
+    "What are some eco-friendly practices for students?",
+    "How can I reduce my carbon footprint?",
+    "Explain renewable energy sources",
+    "What is sustainable living?",
+    "How does recycling help the environment?",
+    "What are the benefits of tree planting?",
+    "How to conserve water at home?",
+    "What is climate change?",
+    "How to reduce plastic waste?",
+    "What is composting and how to start?"
+  ])
+
   const [isLoading, setIsLoading] = useState(false)
+  const [showPrompts, setShowPrompts] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new messages arrive
@@ -254,6 +268,37 @@ export default function ChatWidget() {
           </ScrollArea>
           
           <div className="border-t border-green-200/50 p-4 bg-gradient-to-r from-green-50/50 to-blue-50/50">
+            {/* Prompt Suggestions */}
+            {showPrompts && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-medium text-gray-600">💡 Suggested Questions</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPrompts(false)}
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                  {suggestedPrompts.slice(0, 5).map((prompt, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(prompt)
+                        setShowPrompts(false)
+                      }}
+                      className="text-left p-2 text-xs bg-white/50 hover:bg-white/80 rounded-lg border border-green-200/50 transition-colors"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <Input
                 value={input}
@@ -273,9 +318,19 @@ export default function ChatWidget() {
               </Button>
             </div>
             <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-gray-500">
-                💡 Ask about sustainability, eco-friendly practices, or environmental topics
-              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPrompts(!showPrompts)}
+                  className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                >
+                  💡 Prompts
+                </Button>
+                <p className="text-xs text-gray-500">
+                  Ask about sustainability, eco-friendly practices, or environmental topics
+                </p>
+              </div>
               <div className="flex items-center gap-1 text-xs text-gray-400">
                 <Leaf className="h-3 w-3" />
                 <span>EcoCred AI</span>

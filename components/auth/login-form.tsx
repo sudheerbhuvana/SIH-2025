@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getUsers, getUserByEmail, setCurrentUser } from "@/lib/storage-api"
-import { GraduationCap, User } from "lucide-react"
+import { GraduationCap, User, Settings } from "lucide-react"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -27,6 +27,26 @@ export function LoginForm() {
     setError("")
 
     try {
+      // Hardcoded admin login for immediate access
+      if (email === "admin@eco-cred.in" && password === "123456" && activeTab === "admin") {
+        const adminUser = {
+          id: "admin1",
+          email: "admin@eco-cred.in",
+          name: "System Admin",
+          role: "admin" as const,
+          school: "EcoCred Platform",
+          ecoPoints: 0,
+          badges: [],
+          streak: 0,
+          joinedAt: new Date().toISOString(),
+          completedLessons: [],
+          lessonProgress: {},
+        }
+        setCurrentUser(adminUser)
+        router.push("/admin")
+        return
+      }
+
       const user = await getUserByEmail(email)
 
       if (!user || user.role !== activeTab) {
@@ -41,8 +61,12 @@ export function LoginForm() {
       // Redirect based on role
       if (user.role === "student") {
         router.push("/student")
-      } else {
+      } else if (user.role === "teacher") {
         router.push("/teacher")
+      } else if (user.role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/")
       }
     } catch (err) {
       setError("Login failed. Please try again.")
@@ -59,7 +83,7 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="student" className="flex items-center space-x-2">
               <GraduationCap className="h-4 w-4" />
               <span>Student</span>
@@ -67,6 +91,10 @@ export function LoginForm() {
             <TabsTrigger value="teacher" className="flex items-center space-x-2">
               <User className="h-4 w-4" />
               <span>Teacher</span>
+            </TabsTrigger>
+            <TabsTrigger value="admin" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Admin</span>
             </TabsTrigger>
           </TabsList>
 
@@ -138,6 +166,46 @@ export function LoginForm() {
                 {isLoading ? "Signing in..." : "Sign In as Teacher"}
               </Button>
             </form>
+          </TabsContent>
+
+          <TabsContent value="admin" className="space-y-4 mt-6">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@eco-cred.in"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign in as Admin"}
+              </Button>
+            </form>
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Demo Admin Credentials:</p>
+              <p><strong>Email:</strong> admin@eco-cred.in</p>
+              <p><strong>Password:</strong> 123456</p>
+            </div>
           </TabsContent>
         </Tabs>
 

@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Upload, TreePine, Recycle, Zap, Droplets, CheckCircle } from "lucide-react"
 import { getCurrentUser, getCurrentUserFromSession, getTasks, saveSubmission, getSubmissions } from "@/lib/storage-api"
 import type { User, Task, Submission } from "@/lib/storage-api"
+import { ImageUpload } from "@/components/image-upload"
 
 export default function TaskPage() {
   return (
@@ -33,7 +34,7 @@ function TaskSubmission() {
   const [user, setUser] = useState<User | null>(null)
   const [task, setTask] = useState<Task | null>(null)
   const [existingSubmission, setExistingSubmission] = useState<Submission | null>(null)
-  const [evidenceLink, setEvidenceLink] = useState("") // Changed from evidence to evidenceLink
+  const [evidenceImage, setEvidenceImage] = useState("") // Store uploaded image URL
   const [location, setLocation] = useState("") // Added location field
   const [description, setDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -65,8 +66,8 @@ function TaskSubmission() {
     e.preventDefault()
     if (!user || !task) return
 
-    if (!evidenceLink.trim()) {
-      setError("Please provide an image link as evidence")
+    if (!evidenceImage.trim()) {
+      setError("Please upload an image as evidence")
       return
     }
 
@@ -86,7 +87,7 @@ function TaskSubmission() {
         id: Date.now().toString(),
         taskId: task.id,
         studentId: user.id,
-        evidence: evidenceLink, // Store the image link instead of filename
+        evidence: evidenceImage, // Store the uploaded image URL
         location: location, // Store task location
         description: description, // Store task description
         status: "pending",
@@ -278,19 +279,17 @@ function TaskSubmission() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="evidenceLink">Image Evidence Link</Label>
-                  <Input
-                    id="evidenceLink"
-                    type="url"
-                    placeholder="https://example.com/your-image.jpg"
-                    value={evidenceLink}
-                    onChange={(e) => setEvidenceLink(e.target.value)}
-                    className="mt-1"
-                    required
+                  <Label>Upload Evidence Image</Label>
+                  <ImageUpload
+                    onImageUploaded={(imageUrl) => setEvidenceImage(imageUrl)}
+                    onImageRemoved={() => setEvidenceImage("")}
+                    currentImage={evidenceImage}
+                    disabled={isSubmitting}
+                    uploadedBy={user?.id}
+                    taskId={taskId}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Provide a direct link to your image evidence (e.g., from Google Drive, Dropbox, or any image hosting
-                    service)
+                    Upload a clear photo showing your environmental action
                   </p>
                 </div>
 

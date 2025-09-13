@@ -5,7 +5,7 @@ export interface User {
   id: string
   email: string
   name: string
-  role: "student" | "teacher"
+  role: "student" | "teacher" | "admin"
   school: string
   ecoPoints: number
   badges: string[]
@@ -275,4 +275,142 @@ export const getCurrentUserFromSession = (): User | null => {
   if (typeof window === "undefined") return null
   const user = localStorage.getItem("ecocred_current_user")
   return user ? JSON.parse(user) : null
+}
+
+// School management
+export const getSchools = async (): Promise<any[]> => {
+  try {
+    return await apiCall('/api/schools')
+  } catch (error) {
+    console.error('Error fetching schools:', error)
+    return []
+  }
+}
+
+export const createSchool = async (schoolData: any): Promise<void> => {
+  try {
+    await apiCall('/api/schools', {
+      method: 'POST',
+      body: JSON.stringify(schoolData),
+    })
+  } catch (error) {
+    console.error('Error creating school:', error)
+    throw error
+  }
+}
+
+export const updateSchool = async (id: string, schoolData: any): Promise<void> => {
+  try {
+    await apiCall(`/api/schools/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(schoolData),
+    })
+  } catch (error) {
+    console.error('Error updating school:', error)
+    throw error
+  }
+}
+
+export const deleteSchool = async (id: string): Promise<void> => {
+  try {
+    await apiCall(`/api/schools/${id}`, {
+      method: 'DELETE',
+    })
+  } catch (error) {
+    console.error('Error deleting school:', error)
+    throw error
+  }
+}
+
+// Calendar management
+export const getCalendarEvents = async (schoolId?: string): Promise<any[]> => {
+  try {
+    const url = schoolId ? `/api/calendar?schoolId=${schoolId}` : '/api/calendar'
+    return await apiCall(url)
+  } catch (error) {
+    console.error('Error fetching calendar events:', error)
+    return []
+  }
+}
+
+export const createCalendarEvent = async (eventData: any): Promise<void> => {
+  try {
+    await apiCall('/api/calendar', {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    })
+  } catch (error) {
+    console.error('Error creating calendar event:', error)
+    throw error
+  }
+}
+
+// Seasonal events management
+export const getSeasonalEvents = async (): Promise<any[]> => {
+  try {
+    return await apiCall('/api/seasonal-events')
+  } catch (error) {
+    console.error('Error fetching seasonal events:', error)
+    return []
+  }
+}
+
+export const createSeasonalEvent = async (eventData: any): Promise<void> => {
+  try {
+    await apiCall('/api/seasonal-events', {
+      method: 'POST',
+      body: JSON.stringify(eventData),
+    })
+  } catch (error) {
+    console.error('Error creating seasonal event:', error)
+    throw error
+  }
+}
+
+// Announcements management
+export const getAnnouncements = async (schoolId?: string, targetAudience?: string): Promise<any[]> => {
+  try {
+    const params = new URLSearchParams()
+    if (schoolId) params.append('schoolId', schoolId)
+    if (targetAudience) params.append('targetAudience', targetAudience)
+    const url = `/api/announcements${params.toString() ? '?' + params.toString() : ''}`
+    return await apiCall(url)
+  } catch (error) {
+    console.error('Error fetching announcements:', error)
+    return []
+  }
+}
+
+export const createAnnouncement = async (announcementData: any): Promise<void> => {
+  try {
+    await apiCall('/api/announcements', {
+      method: 'POST',
+      body: JSON.stringify(announcementData),
+    })
+  } catch (error) {
+    console.error('Error creating announcement:', error)
+    throw error
+  }
+}
+
+// Image management
+export const getImages = async (filters?: {
+  uploadedBy?: string
+  taskId?: string
+  submissionId?: string
+  isPublic?: boolean
+}): Promise<any[]> => {
+  try {
+    const params = new URLSearchParams()
+    if (filters?.uploadedBy) params.append('uploadedBy', filters.uploadedBy)
+    if (filters?.taskId) params.append('taskId', filters.taskId)
+    if (filters?.submissionId) params.append('submissionId', filters.submissionId)
+    if (filters?.isPublic !== undefined) params.append('isPublic', filters.isPublic.toString())
+    
+    const url = `/api/images${params.toString() ? '?' + params.toString() : ''}`
+    return await apiCall(url)
+  } catch (error) {
+    console.error('Error fetching images:', error)
+    return []
+  }
 }

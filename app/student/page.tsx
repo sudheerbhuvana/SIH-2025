@@ -36,6 +36,13 @@ import type { User, Task, Submission } from "@/lib/storage-api"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { BadgeSystem } from "@/components/gamification/badge-system"
+import { ProgressTracker } from "@/components/progress-tracker"
+import { Leaderboard } from "@/components/leaderboard"
+import { NotificationCenter } from "@/components/notification-center"
+import { Calendar } from "@/components/calendar"
+import { SeasonalEvents } from "@/components/seasonal-events"
+import { Announcements } from "@/components/announcements"
+import { ProfileCard } from "@/components/avatar"
 
 export default function StudentPortal() {
   return (
@@ -199,13 +206,15 @@ function StudentDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="lessons">Lessons</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="badges">Badges</TabsTrigger>
-            <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="announcements">Updates</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -415,21 +424,32 @@ function StudentDashboard() {
                     <CardContent>
                       <p className="text-muted-foreground mb-4">{task.description}</p>
                       {userSubmission ? (
-                        <div className="flex items-center justify-between">
-                          <Badge
-                            variant={
-                              userSubmission.status === "approved"
-                                ? "default"
-                                : userSubmission.status === "pending"
-                                  ? "secondary"
-                                  : "destructive"
-                            }
-                          >
-                            {userSubmission.status}
-                          </Badge>
-                          {userSubmission.status === "approved" && (
-                            <span className="text-sm text-primary font-medium">+{task.points} points earned!</span>
+                        <div className="space-y-3">
+                          {userSubmission.evidence && userSubmission.evidence.startsWith('http') && (
+                            <div className="w-full h-32 rounded-lg overflow-hidden">
+                              <img
+                                src={userSubmission.evidence}
+                                alt="Task evidence"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                           )}
+                          <div className="flex items-center justify-between">
+                            <Badge
+                              variant={
+                                userSubmission.status === "approved"
+                                  ? "default"
+                                  : userSubmission.status === "pending"
+                                    ? "secondary"
+                                    : "destructive"
+                              }
+                            >
+                              {userSubmission.status}
+                            </Badge>
+                            {userSubmission.status === "approved" && (
+                              <span className="text-sm text-primary font-medium">+{task.points} points earned!</span>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <Button asChild className="w-full">
@@ -455,147 +475,27 @@ function StudentDashboard() {
 
           {/* Leaderboard Tab */}
           <TabsContent value="leaderboard" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span>Top Environmental Champions</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {leaderboard
-                    .filter(
-                      (student) =>
-                        student.school &&
-                        [
-                          "Government Senior Secondary School, Chandigarh",
-                          "DAV Public School, Ludhiana",
-                          "Sacred Heart Convent School, Amritsar",
-                          "St. Joseph's Senior Secondary School, Patiala",
-                          "Ryan International School, Mohali",
-                        ].includes(student.school),
-                    )
-                    .slice(0, 10)
-                    .map((student, index) => (
-                      <div
-                        key={student.id}
-                        className={`flex items-center space-x-4 p-3 rounded-lg ${
-                          student.id === user.id ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
-                        }`}
-                      >
-                        <div className="flex-shrink-0">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                              index === 0
-                                ? "bg-yellow-500"
-                                : index === 1
-                                  ? "bg-gray-400"
-                                  : index === 2
-                                    ? "bg-amber-600"
-                                    : "bg-primary"
-                            }`}
-                          >
-                            {index + 1}
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className={`font-semibold ${student.id === user.id ? "text-primary" : ""}`}>
-                            {student.name} {student.id === user.id && "(You)"}
-                          </p>
-                          <p className="text-sm text-muted-foreground">{student.school}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {student.ecoPoints} eco-points • {student.streak} day streak
-                          </p>
-                        </div>
-                        <div className="flex space-x-1">
-                          {student.badges.slice(0, 3).map((badge, badgeIndex) => (
-                            <Badge key={badgeIndex} variant="secondary" className="text-xs">
-                              {badge}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  {leaderboard.filter(
-                    (student) =>
-                      student.school &&
-                      [
-                        "Government Senior Secondary School, Chandigarh",
-                        "DAV Public School, Ludhiana",
-                        "Sacred Heart Convent School, Amritsar",
-                        "St. Joseph's Senior Secondary School, Patiala",
-                        "Ryan International School, Mohali",
-                      ].includes(student.school),
-                  ).length === 0 && (
-                    <div className="text-center py-8">
-                      <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No students from Punjab schools yet</p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Be the first to join and start earning eco-points!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <Leaderboard />
           </TabsContent>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Name</label>
-                    <p className="text-lg">{user.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <p className="text-lg">{user.email}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Joined</label>
-                    <p className="text-lg">{new Date(user.joinedAt).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Role</label>
-                    <Badge variant="outline" className="ml-2">
-                      {user.role}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Progress Tab */}
+          <TabsContent value="progress" className="space-y-6">
+            <ProgressTracker />
+          </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Award className="h-5 w-5 text-primary" />
-                    <span>Badges & Achievements</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {user.badges.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      {user.badges.map((badge, index) => (
-                        <Badge key={index} variant="secondary" className="justify-center py-2">
-                          {badge}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No badges earned yet</p>
-                      <p className="text-sm text-muted-foreground mt-2">Complete tasks to earn your first badge!</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-6">
+            <Calendar schoolId={user.school} showAddEvent={false} />
+          </TabsContent>
+
+          {/* Events Tab */}
+          <TabsContent value="events" className="space-y-6">
+            <SeasonalEvents />
+          </TabsContent>
+
+          {/* Announcements Tab */}
+          <TabsContent value="announcements" className="space-y-6">
+            <Announcements schoolId={user.school} targetAudience="students" showAddButton={false} />
           </TabsContent>
         </Tabs>
       </div>

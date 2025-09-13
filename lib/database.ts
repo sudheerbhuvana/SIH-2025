@@ -1,5 +1,5 @@
 import { getDatabase } from './mongodb'
-import type { User, Task, Submission, GlobalStats, LessonProgress } from './types'
+import type { User, Task, Submission, GlobalStats, LessonProgress, School, CalendarEvent, SeasonalEvent, Announcement, ImageUpload } from './types'
 
 // User management
 export async function getUsers(): Promise<User[]> {
@@ -169,8 +169,11 @@ export async function getGlobalStats(): Promise<GlobalStats> {
 export async function updateGlobalStats(stats: Partial<GlobalStats>): Promise<void> {
   try {
     const db = await getDatabase()
-    const updatedStats = {
-      ...stats,
+    const updatedStats: GlobalStats = {
+      totalSaplings: stats.totalSaplings || 0,
+      totalWasteSaved: stats.totalWasteSaved || 0,
+      totalStudents: stats.totalStudents || 0,
+      totalTasks: stats.totalTasks || 0,
       lastUpdated: new Date().toISOString(),
     }
     await db.collection<GlobalStats>('globalStats').replaceOne(
@@ -264,6 +267,92 @@ export async function getCompletedLessonsCount(userId: string): Promise<number> 
   }
 }
 
+// Enhanced badge system with automatic badge assignment
+export async function assignBadges(userId: string): Promise<string[]> {
+  try {
+    const db = await getDatabase()
+    const user = await db.collection<User>('users').findOne({ id: userId })
+    
+    if (!user) return []
+
+    const submissions = await db.collection<Submission>('submissions')
+      .find({ studentId: userId, status: "approved" }).toArray()
+    
+    const tasks = await db.collection<Task>('tasks').find({}).toArray()
+    
+    // Calculate completed tasks by category
+    const completedTasksByCategory = submissions.reduce((acc, submission) => {
+      const task = tasks.find(t => t.id === submission.taskId)
+      if (task) {
+        acc[task.category] = (acc[task.category] || 0) + 1
+      }
+      return acc
+    }, {} as { [key: string]: number })
+
+    const newBadges: string[] = []
+    const currentBadges = user.badges || []
+
+    // First Step Badge
+    if (submissions.length > 0 && !currentBadges.includes("First Step")) {
+      newBadges.push("First Step")
+    }
+
+    // Eco Warrior Badge
+    if (user.ecoPoints >= 100 && !currentBadges.includes("Eco Warrior")) {
+      newBadges.push("Eco Warrior")
+    }
+
+    // Tree Planter Badge
+    if ((completedTasksByCategory.planting || 0) >= 3 && !currentBadges.includes("Tree Planter")) {
+      newBadges.push("Tree Planter")
+    }
+
+    // Waste Warrior Badge
+    if ((completedTasksByCategory.waste || 0) >= 3 && !currentBadges.includes("Waste Warrior")) {
+      newBadges.push("Waste Warrior")
+    }
+
+    // Energy Saver Badge
+    if ((completedTasksByCategory.energy || 0) >= 3 && !currentBadges.includes("Energy Saver")) {
+      newBadges.push("Energy Saver")
+    }
+
+    // Water Guardian Badge
+    if ((completedTasksByCategory.water || 0) >= 3 && !currentBadges.includes("Water Guardian")) {
+      newBadges.push("Water Guardian")
+    }
+
+    // Streak Master Badge
+    if (user.streak >= 7 && !currentBadges.includes("Streak Master")) {
+      newBadges.push("Streak Master")
+    }
+
+    // Environmental Champion Badge
+    if (user.ecoPoints >= 500 && !currentBadges.includes("Environmental Champion")) {
+      newBadges.push("Environmental Champion")
+    }
+
+    // Green Champion Badge (for lesson completion)
+    if (user.completedLessons && user.completedLessons.length >= 2 && !currentBadges.includes("Green Champion")) {
+      newBadges.push("Green Champion")
+    }
+
+    // Update user with new badges
+    if (newBadges.length > 0) {
+      const updatedBadges = [...currentBadges, ...newBadges]
+      await db.collection<User>('users').updateOne(
+        { id: userId },
+        { $set: { badges: updatedBadges } }
+      )
+    }
+
+    return newBadges
+  } catch (error) {
+    console.error('Error assigning badges:', error)
+    return []
+  }
+}
+
 // Initialize demo data
 export async function initializeDemoData(): Promise<void> {
   try {
@@ -328,7 +417,7 @@ export async function initializeDemoData(): Promise<void> {
           role: "student",
           school: "Government Senior Secondary School, Chandigarh",
           ecoPoints: 45,
-          badges: [],
+          badges: ["First Step"],
           streak: 3,
           joinedAt: new Date().toISOString(),
           completedLessons: [],
@@ -341,7 +430,7 @@ export async function initializeDemoData(): Promise<void> {
           role: "student",
           school: "DAV Public School, Ludhiana",
           ecoPoints: 120,
-          badges: ["Eco Warrior"],
+          badges: ["First Step", "Eco Warrior", "Tree Planter"],
           streak: 7,
           joinedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           completedLessons: ["tree-planting", "waste-management"],
@@ -354,7 +443,7 @@ export async function initializeDemoData(): Promise<void> {
           role: "student",
           school: "Sacred Heart Convent School, Amritsar",
           ecoPoints: 95,
-          badges: ["Green Champion"],
+          badges: ["First Step", "Green Champion", "Energy Saver"],
           streak: 5,
           joinedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
           completedLessons: ["energy-conservation"],
@@ -367,7 +456,7 @@ export async function initializeDemoData(): Promise<void> {
           role: "student",
           school: "St. Joseph's Senior Secondary School, Patiala",
           ecoPoints: 78,
-          badges: [],
+          badges: ["First Step", "Water Guardian"],
           streak: 2,
           joinedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
           completedLessons: ["water-conservation"],
@@ -380,7 +469,7 @@ export async function initializeDemoData(): Promise<void> {
           role: "student",
           school: "Ryan International School, Mohali",
           ecoPoints: 156,
-          badges: ["Eco Warrior", "Tree Planter"],
+          badges: ["First Step", "Eco Warrior", "Tree Planter", "Streak Master", "Green Champion"],
           streak: 12,
           joinedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
           completedLessons: ["tree-planting", "waste-management", "energy-conservation"],
@@ -399,12 +488,279 @@ export async function initializeDemoData(): Promise<void> {
           completedLessons: [],
           lessonProgress: {},
         },
+        {
+          id: "admin1",
+          email: "admin@eco-cred.in",
+          name: "System Admin",
+          role: "admin",
+          school: "EcoCred Platform",
+          ecoPoints: 0,
+          badges: [],
+          streak: 0,
+          joinedAt: new Date().toISOString(),
+          completedLessons: [],
+          lessonProgress: {},
+        },
       ]
 
       await db.collection<User>('users').insertMany(demoUsers)
     }
+
+    // Initialize demo schools if not exists
+    const existingSchools = await db.collection<School>('schools').findOne({})
+    if (!existingSchools) {
+      const demoSchools: School[] = [
+        {
+          id: "school1",
+          name: "Government Senior Secondary School, Chandigarh",
+          location: "Chandigarh, Punjab",
+          description: "Leading government school promoting environmental education",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "school2",
+          name: "DAV Public School, Ludhiana",
+          location: "Ludhiana, Punjab",
+          description: "Private school with strong eco-friendly initiatives",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "school3",
+          name: "Sacred Heart Convent School, Amritsar",
+          location: "Amritsar, Punjab",
+          description: "Convent school focused on holistic environmental education",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "school4",
+          name: "St. Joseph's Senior Secondary School, Patiala",
+          location: "Patiala, Punjab",
+          description: "Catholic school with green campus initiatives",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: "school5",
+          name: "Ryan International School, Mohali",
+          location: "Mohali, Punjab",
+          description: "International school promoting sustainable practices",
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+
+      await db.collection<School>('schools').insertMany(demoSchools)
+    }
   } catch (error) {
     console.error('Error initializing demo data:', error)
+    throw error
+  }
+}
+
+// School management
+export async function getSchools(): Promise<School[]> {
+  try {
+    const db = await getDatabase()
+    return await db.collection<School>('schools').find({}).toArray()
+  } catch (error) {
+    console.error('Error fetching schools:', error)
+    return []
+  }
+}
+
+export async function createSchool(schoolData: Omit<School, 'id'>): Promise<School> {
+  try {
+    const db = await getDatabase()
+    const school: School = {
+      id: Date.now().toString(),
+      ...schoolData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    await db.collection<School>('schools').insertOne(school)
+    return school
+  } catch (error) {
+    console.error('Error creating school:', error)
+    throw error
+  }
+}
+
+export async function updateSchool(id: string, schoolData: Partial<School>): Promise<void> {
+  try {
+    const db = await getDatabase()
+    await db.collection<School>('schools').updateOne(
+      { id },
+      { 
+        $set: { 
+          ...schoolData, 
+          updatedAt: new Date().toISOString() 
+        } 
+      }
+    )
+  } catch (error) {
+    console.error('Error updating school:', error)
+    throw error
+  }
+}
+
+export async function deleteSchool(id: string): Promise<void> {
+  try {
+    const db = await getDatabase()
+    await db.collection<School>('schools').deleteOne({ id })
+  } catch (error) {
+    console.error('Error deleting school:', error)
+    throw error
+  }
+}
+
+// Calendar management
+export async function getCalendarEvents(schoolId?: string): Promise<CalendarEvent[]> {
+  try {
+    const db = await getDatabase()
+    const filter = schoolId ? { schoolId } : {}
+    return await db.collection<CalendarEvent>('calendarEvents').find(filter).toArray()
+  } catch (error) {
+    console.error('Error fetching calendar events:', error)
+    return []
+  }
+}
+
+export async function createCalendarEvent(eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> {
+  try {
+    const db = await getDatabase()
+    const event: CalendarEvent = {
+      id: Date.now().toString(),
+      ...eventData,
+      createdAt: new Date().toISOString()
+    }
+    await db.collection<CalendarEvent>('calendarEvents').insertOne(event)
+    return event
+  } catch (error) {
+    console.error('Error creating calendar event:', error)
+    throw error
+  }
+}
+
+// Seasonal events management
+export async function getSeasonalEvents(): Promise<SeasonalEvent[]> {
+  try {
+    const db = await getDatabase()
+    return await db.collection<SeasonalEvent>('seasonalEvents').find({}).toArray()
+  } catch (error) {
+    console.error('Error fetching seasonal events:', error)
+    return []
+  }
+}
+
+export async function createSeasonalEvent(eventData: Omit<SeasonalEvent, 'id'>): Promise<SeasonalEvent> {
+  try {
+    const db = await getDatabase()
+    const event: SeasonalEvent = {
+      id: Date.now().toString(),
+      ...eventData,
+      createdAt: new Date().toISOString()
+    }
+    await db.collection<SeasonalEvent>('seasonalEvents').insertOne(event)
+    return event
+  } catch (error) {
+    console.error('Error creating seasonal event:', error)
+    throw error
+  }
+}
+
+// Announcements management
+export async function getAnnouncements(schoolId?: string, targetAudience?: string): Promise<Announcement[]> {
+  try {
+    const db = await getDatabase()
+    const filter: any = { isActive: true }
+    if (schoolId) filter.schoolId = schoolId
+    if (targetAudience) filter.targetAudience = targetAudience
+    return await db.collection<Announcement>('announcements').find(filter).sort({ createdAt: -1 }).toArray()
+  } catch (error) {
+    console.error('Error fetching announcements:', error)
+    return []
+  }
+}
+
+export async function createAnnouncement(announcementData: Omit<Announcement, 'id'>): Promise<Announcement> {
+  try {
+    const db = await getDatabase()
+    const announcement: Announcement = {
+      id: Date.now().toString(),
+      ...announcementData,
+      createdAt: new Date().toISOString()
+    }
+    await db.collection<Announcement>('announcements').insertOne(announcement)
+    return announcement
+  } catch (error) {
+    console.error('Error creating announcement:', error)
+    throw error
+  }
+}
+
+// Image management
+export async function saveImageUpload(imageData: Omit<ImageUpload, 'id'>): Promise<ImageUpload> {
+  try {
+    const db = await getDatabase()
+    const image: ImageUpload = {
+      id: Date.now().toString(),
+      ...imageData,
+      uploadedAt: new Date().toISOString()
+    }
+    await db.collection<ImageUpload>('imageUploads').insertOne(image)
+    return image
+  } catch (error) {
+    console.error('Error saving image upload:', error)
+    throw error
+  }
+}
+
+export async function getImageUploads(filters?: {
+  uploadedBy?: string
+  taskId?: string
+  submissionId?: string
+  isPublic?: boolean
+}): Promise<ImageUpload[]> {
+  try {
+    const db = await getDatabase()
+    const query: any = {}
+    
+    if (filters?.uploadedBy) query.uploadedBy = filters.uploadedBy
+    if (filters?.taskId) query.taskId = filters.taskId
+    if (filters?.submissionId) query.submissionId = filters.submissionId
+    if (filters?.isPublic !== undefined) query.isPublic = filters.isPublic
+    
+    return await db.collection<ImageUpload>('imageUploads').find(query).sort({ uploadedAt: -1 }).toArray()
+  } catch (error) {
+    console.error('Error fetching image uploads:', error)
+    return []
+  }
+}
+
+export async function getImageUploadById(id: string): Promise<ImageUpload | null> {
+  try {
+    const db = await getDatabase()
+    return await db.collection<ImageUpload>('imageUploads').findOne({ id })
+  } catch (error) {
+    console.error('Error fetching image upload by ID:', error)
+    return null
+  }
+}
+
+export async function deleteImageUpload(id: string): Promise<void> {
+  try {
+    const db = await getDatabase()
+    await db.collection<ImageUpload>('imageUploads').deleteOne({ id })
+  } catch (error) {
+    console.error('Error deleting image upload:', error)
     throw error
   }
 }

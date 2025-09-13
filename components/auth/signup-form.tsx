@@ -11,17 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUsers, getUserByEmail, saveUser, setCurrentUser } from "@/lib/storage-api"
+import { getUsers, getUserByEmail, saveUser, setCurrentUser, getSchools } from "@/lib/storage-api"
 import type { User } from "@/lib/storage-api"
 import { GraduationCap, UserIcon } from "lucide-react"
+import { SchoolSelect } from "@/components/school-select"
 
-const SCHOOLS = [
-  "Government Senior Secondary School, Chandigarh",
-  "DAV Public School, Ludhiana",
-  "Sacred Heart Convent School, Amritsar",
-  "St. Joseph's Senior Secondary School, Jalandhar",
-  "Ryan International School, Mohali",
-]
+// Schools are now loaded dynamically from the database via SchoolSelect component
 
 const LOCALITIES = [
   "Amritsar",
@@ -106,13 +101,22 @@ export function SignupForm() {
         return
       }
 
+      // Get school name from school ID
+      const schools = await getSchools()
+      const selectedSchool = schools.find(school => school.id === formData.school)
+      
+      if (!selectedSchool) {
+        setError("Please select a valid school")
+        return
+      }
+
       // Create new user
       const newUser: User = {
         id: Date.now().toString(),
         email: formData.email,
         name: formData.name,
         role: activeTab as "student" | "teacher",
-        school: formData.school,
+        school: selectedSchool.name,
         ecoPoints: 0,
         badges: [],
         streak: 0,
@@ -185,18 +189,12 @@ export function SignupForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="school">School Name</Label>
-                <Select onValueChange={handleSchoolChange} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your school" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SCHOOLS.map((school) => (
-                      <SelectItem key={school} value={school}>
-                        {school}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SchoolSelect
+                  value={formData.school}
+                  onValueChange={handleSchoolChange}
+                  placeholder="Select your school"
+                  disabled={isLoading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="locality">Locality/City</Label>
@@ -276,18 +274,12 @@ export function SignupForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="teacher-school">School Name</Label>
-                <Select onValueChange={handleSchoolChange} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your school" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SCHOOLS.map((school) => (
-                      <SelectItem key={school} value={school}>
-                        {school}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SchoolSelect
+                  value={formData.school}
+                  onValueChange={handleSchoolChange}
+                  placeholder="Select your school"
+                  disabled={isLoading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="teacher-password">Password</Label>

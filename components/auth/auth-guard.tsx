@@ -9,7 +9,7 @@ import type { User } from "@/lib/storage-api"
 
 interface AuthGuardProps {
   children: React.ReactNode
-  requiredRole?: "student" | "teacher"
+  requiredRole?: "student" | "teacher" | "admin"
   redirectTo?: string
 }
 
@@ -30,8 +30,12 @@ export function AuthGuard({ children, requiredRole, redirectTo = "/login" }: Aut
       // Redirect to appropriate portal based on user role
       if (currentUser.role === "student") {
         router.push("/student")
-      } else {
+      } else if (currentUser.role === "teacher") {
         router.push("/teacher")
+      } else if (currentUser.role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/")
       }
       return
     }
