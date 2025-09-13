@@ -1,0 +1,127 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to eco-friendly green color palette */
+  --background: #f0fdf4; /* Light green for fresh feel */
+  --foreground: #374151; /* Dark gray for text */
+  --card: #ffffff; /* White for card backgrounds */
+  --card-foreground: #374151; /* Dark gray for card text */
+  --popover: #ffffff; /* White for popover backgrounds */
+  --popover-foreground: #374151; /* Dark gray for popover text */
+  --primary: #15803d; /* Green-700 for primary buttons */
+  --primary-foreground: #ffffff; /* White text on primary buttons */
+  --secondary: #16a34a; /* Changed from #84cc16 to darker green for better contrast */
+  --secondary-foreground: #ffffff; /* White text on secondary actions */
+  --muted: #f0fdf4; /* Light green as muted background */
+  --muted-foreground: #374151; /* Dark gray for muted text */
+  --accent: #16a34a; /* Changed from #84cc16 to darker green for better contrast */
+  --accent-foreground: #ffffff; /* White for accent text */
+  --destructive: #f44336; /* Red for destructive actions */
+  --destructive-foreground: #ffffff; /* White text for destructive actions */
+  --border: #d1d5db; /* Light gray for borders */
+  --input: #ffffff; /* White for input fields */
+  --ring: rgba(24, 185, 87, 0.5); /* Soft green for focus rings */
+  --chart-1: #15803d; /* Green for primary chart elements */
+  --chart-2: #16a34a; /* Changed from #84cc16 to darker green for better contrast */
+  --chart-3: #374151; /* Dark gray for neutral chart elements */
+  --chart-4: #f0fdf4; /* Light green for background chart elements */
+  --chart-5: #ffffff; /* White for chart backgrounds */
+  --radius: 0.5rem; /* Rounded corners for friendly design */
+  --sidebar: #ffffff; /* White for sidebar backgrounds */
+  --sidebar-foreground: #374151; /* Dark gray for sidebar text */
+  --sidebar-primary: #15803d; /* Green for sidebar highlights */
+  --sidebar-primary-foreground: #ffffff; /* White text for sidebar highlights */
+  --sidebar-accent: #16a34a; /* Changed from #84cc16 to darker green for better contrast */
+  --sidebar-accent-foreground: #ffffff; /* White for sidebar accent text */
+  --sidebar-border: #d1d5db; /* Light gray for sidebar borders */
+  --sidebar-ring: rgba(24, 185, 87, 0.5); /* Soft green for sidebar focus rings */
+}
+
+.dark {
+  /* Updated dark mode colors to maintain eco theme */
+  --background: #1f2937; /* Dark gray background */
+  --foreground: #f9fafb; /* Light gray text */
+  --card: #374151; /* Dark gray for cards */
+  --card-foreground: #f9fafb; /* Light gray for card text */
+  --popover: #374151; /* Dark gray for popovers */
+  --popover-foreground: #f9fafb; /* Light gray for popover text */
+  --primary: #22c55e; /* Brighter green for dark mode */
+  --primary-foreground: #ffffff; /* White text */
+  --secondary: #22c55e; /* Changed from #84cc16 to brighter green for dark mode consistency */
+  --secondary-foreground: #ffffff; /* White text */
+  --muted: #374151; /* Dark gray muted */
+  --muted-foreground: #9ca3af; /* Medium gray for muted text */
+  --accent: #22c55e; /* Changed from #84cc16 to brighter green for dark mode consistency */
+  --accent-foreground: #ffffff; /* White accent text */
+  --destructive: #ef4444; /* Red for destructive actions */
+  --destructive-foreground: #ffffff; /* White text */
+  --border: #4b5563; /* Medium gray borders */
+  --input: #374151; /* Dark gray inputs */
+  --ring: rgba(34, 197, 94, 0.5); /* Green focus rings */
+  --chart-1: #22c55e; /* Bright green charts */
+  --chart-2: #22c55e; /* Changed from #84cc16 to brighter green for consistency */
+  --chart-3: #f9fafb; /* Light gray charts */
+  --chart-4: #374151; /* Dark gray charts */
+  --chart-5: #1f2937; /* Dark background charts */
+  --sidebar: #374151; /* Dark gray sidebar */
+  --sidebar-foreground: #f9fafb; /* Light gray sidebar text */
+  --sidebar-primary: #22c55e; /* Bright green sidebar highlights */
+  --sidebar-primary-foreground: #ffffff; /* White sidebar highlight text */
+  --sidebar-accent: #22c55e; /* Changed from #84cc16 to brighter green for consistency */
+  --sidebar-accent-foreground: #ffffff; /* White sidebar accent text */
+  --sidebar-border: #4b5563; /* Medium gray sidebar borders */
+  --sidebar-ring: rgba(24, 185, 87, 0.5); /* Green sidebar focus rings */
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
