@@ -14,8 +14,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Upload, TreePine, Recycle, Zap, Droplets, CheckCircle } from "lucide-react"
-import { getCurrentUser, getTasks, saveSubmission, getSubmissions } from "@/lib/storage"
-import type { User, Task, Submission } from "@/lib/storage"
+import { getCurrentUser, getCurrentUserFromSession, getTasks, saveSubmission, getSubmissions } from "@/lib/storage-api"
+import type { User, Task, Submission } from "@/lib/storage-api"
 
 export default function TaskPage() {
   return (
@@ -41,16 +41,24 @@ function TaskSubmission() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    const tasks = getTasks()
-    const submissions = getSubmissions()
+    const loadData = async () => {
+      try {
+        const currentUser = getCurrentUserFromSession()
+        const tasks = await getTasks()
+        const submissions = await getSubmissions()
 
-    const foundTask = tasks.find((t) => t.id === taskId)
-    const userSubmission = submissions.find((s) => s.taskId === taskId && s.studentId === currentUser?.id)
+        const foundTask = tasks.find((t) => t.id === taskId)
+        const userSubmission = submissions.find((s) => s.taskId === taskId && s.studentId === currentUser?.id)
 
-    setUser(currentUser)
-    setTask(foundTask || null)
-    setExistingSubmission(userSubmission || null)
+        setUser(currentUser)
+        setTask(foundTask || null)
+        setExistingSubmission(userSubmission || null)
+      } catch (error) {
+        console.error('Error loading task data:', error)
+      }
+    }
+
+    loadData()
   }, [taskId])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +94,7 @@ function TaskSubmission() {
         mlConfidence,
       }
 
-      saveSubmission(submission)
+      await saveSubmission(submission)
       setSuccess(true)
 
       // Redirect after 2 seconds

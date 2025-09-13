@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getUsers, saveUser, setCurrentUser } from "@/lib/storage"
-import type { User } from "@/lib/storage"
+import { getUsers, getUserByEmail, saveUser, setCurrentUser } from "@/lib/storage-api"
+import type { User } from "@/lib/storage-api"
 import { GraduationCap, UserIcon } from "lucide-react"
 
 const SCHOOLS = [
@@ -99,8 +99,7 @@ export function SignupForm() {
       }
 
       // Check if user already exists
-      const users = getUsers()
-      const existingUser = users.find((u) => u.email === formData.email)
+      const existingUser = await getUserByEmail(formData.email)
 
       if (existingUser) {
         setError("An account with this email already exists")
@@ -123,7 +122,7 @@ export function SignupForm() {
       }
 
       // Save user and set as current
-      saveUser(newUser)
+      await saveUser(newUser)
       setCurrentUser(newUser)
 
       // Redirect based on role

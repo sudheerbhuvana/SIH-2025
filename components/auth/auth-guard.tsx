@@ -4,8 +4,8 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/lib/storage"
-import type { User } from "@/lib/storage"
+import { getCurrentUserFromSession } from "@/lib/storage-api"
+import type { User } from "@/lib/storage-api"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -19,7 +19,7 @@ export function AuthGuard({ children, requiredRole, redirectTo = "/login" }: Aut
   const router = useRouter()
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
+    const currentUser = getCurrentUserFromSession()
 
     if (!currentUser) {
       router.push(redirectTo)

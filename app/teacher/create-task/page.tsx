@@ -14,8 +14,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Plus } from "lucide-react"
-import { getCurrentUser, saveTask } from "@/lib/storage"
-import type { Task } from "@/lib/storage"
+import { getCurrentUser, getCurrentUserFromSession, saveTask } from "@/lib/storage-api"
+import type { Task } from "@/lib/storage-api"
 
 export default function CreateTaskPage() {
   return (
@@ -56,7 +56,7 @@ function CreateTaskForm() {
     setError("")
 
     try {
-      const user = getCurrentUser()
+      const user = getCurrentUserFromSession()
       if (!user) {
         setError("You must be logged in to create tasks")
         return
@@ -95,7 +95,7 @@ function CreateTaskForm() {
         createdAt: new Date().toISOString(),
       }
 
-      saveTask(newTask)
+      await saveTask(newTask)
       router.push("/teacher")
     } catch (err) {
       setError("Failed to create task. Please try again.")

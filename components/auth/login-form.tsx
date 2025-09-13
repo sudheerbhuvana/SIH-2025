@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getUsers, setCurrentUser } from "@/lib/storage"
+import { getUsers, getUserByEmail, setCurrentUser } from "@/lib/storage-api"
 import { GraduationCap, User } from "lucide-react"
 
 export function LoginForm() {
@@ -27,10 +27,9 @@ export function LoginForm() {
     setError("")
 
     try {
-      const users = getUsers()
-      const user = users.find((u) => u.email === email && u.role === activeTab)
+      const user = await getUserByEmail(email)
 
-      if (!user) {
+      if (!user || user.role !== activeTab) {
         setError("Invalid email or user type. Please check your credentials.")
         return
       }

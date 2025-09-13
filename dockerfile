@@ -31,6 +31,9 @@ ENV NODE_ENV=production
 # Disable telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# MongoDB environment variables (set these in your deployment)
+ENV MONGODB_URI=mongodb://localhost:27017/ecocred
+
 # Create user (non-root for security)
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

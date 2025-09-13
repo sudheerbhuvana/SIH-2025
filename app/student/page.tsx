@@ -26,12 +26,13 @@ import {
 import {
   getCurrentUser,
   setCurrentUser,
+  getCurrentUserFromSession,
   getTasks,
   getSubmissions,
   getUsers,
   getCompletedLessonsCount,
-} from "@/lib/storage"
-import type { User, Task, Submission } from "@/lib/storage"
+} from "@/lib/storage-api"
+import type { User, Task, Submission } from "@/lib/storage-api"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { BadgeSystem } from "@/components/gamification/badge-system"
@@ -53,21 +54,30 @@ function StudentDashboard() {
   const router = useRouter()
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    const allTasks = getTasks()
-    const allSubmissions = getSubmissions()
-    const students = getUsers()
-      .filter((u) => u.role === "student")
-      .sort((a, b) => b.ecoPoints - a.ecoPoints)
+    const loadData = async () => {
+      try {
+        const currentUser = getCurrentUserFromSession()
+        const allTasks = await getTasks()
+        const allSubmissions = await getSubmissions()
+        const students = await getUsers()
+        const studentUsers = students.filter((u) => u.role === "student")
+        const sortedStudents = studentUsers.sort((a, b) => b.ecoPoints - a.ecoPoints)
 
-    setUser(currentUser)
-    setTasks(allTasks)
-    setSubmissions(allSubmissions)
-    setLeaderboard(students)
+        setUser(currentUser)
+        setTasks(allTasks)
+        setSubmissions(allSubmissions)
+        setLeaderboard(sortedStudents)
 
-    if (currentUser) {
-      setCompletedLessonsCount(getCompletedLessonsCount(currentUser.id))
+        if (currentUser) {
+          const count = await getCompletedLessonsCount(currentUser.id)
+          setCompletedLessonsCount(count)
+        }
+      } catch (error) {
+        console.error('Error loading student data:', error)
+      }
     }
+
+    loadData()
   }, [])
 
   const handleLogout = () => {

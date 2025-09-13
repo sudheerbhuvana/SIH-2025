@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Leaf, TreePine, Recycle, Users, Trophy, Star } from "lucide-react"
-import { getGlobalStats, initializeDemoData, getUsers } from "@/lib/storage"
-import type { GlobalStats, User } from "@/lib/storage"
+import { getGlobalStats, initializeDemoData, getUsers } from "@/lib/storage-api"
+import type { GlobalStats, User } from "@/lib/storage-api"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -19,14 +19,24 @@ export default function HomePage() {
 
   useEffect(() => {
     // Initialize demo data and load stats
-    initializeDemoData()
-    const globalStats = getGlobalStats()
-    const users = getUsers().filter((user) => user.role === "student")
-    const sortedStudents = users.sort((a, b) => b.ecoPoints - a.ecoPoints).slice(0, 5)
+    const loadData = async () => {
+      try {
+        await initializeDemoData()
+        const globalStats = await getGlobalStats()
+        const users = await getUsers()
+        const studentUsers = users.filter((user) => user.role === "student")
+        const sortedStudents = studentUsers.sort((a, b) => b.ecoPoints - a.ecoPoints).slice(0, 5)
 
-    setStats(globalStats)
-    setTopStudents(sortedStudents)
-    setIsLoaded(true)
+        setStats(globalStats)
+        setTopStudents(sortedStudents)
+        setIsLoaded(true)
+      } catch (error) {
+        console.error('Error loading data:', error)
+        setIsLoaded(true)
+      }
+    }
+
+    loadData()
   }, [])
 
   if (!isLoaded || !stats) {

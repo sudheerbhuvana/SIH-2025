@@ -29,6 +29,7 @@ import {
 import {
   getCurrentUser,
   setCurrentUser,
+  getCurrentUserFromSession,
   getTasks,
   getSubmissions,
   getUsers,
@@ -37,8 +38,8 @@ import {
   updateGlobalStats,
   getGlobalStats,
   getCompletedLessonsCount,
-} from "@/lib/storage"
-import type { User, Task, Submission } from "@/lib/storage"
+} from "@/lib/storage-api"
+import type { User, Task, Submission } from "@/lib/storage-api"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -62,15 +63,24 @@ function TeacherDashboard() {
   const router = useRouter()
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    const allTasks = getTasks()
-    const allSubmissions = getSubmissions()
-    const allStudents = getUsers().filter((u) => u.role === "student")
+    const loadData = async () => {
+      try {
+        const currentUser = getCurrentUserFromSession()
+        const allTasks = await getTasks()
+        const allSubmissions = await getSubmissions()
+        const allUsers = await getUsers()
+        const studentUsers = allUsers.filter((u) => u.role === "student")
 
-    setUser(currentUser)
-    setTasks(allTasks)
-    setSubmissions(allSubmissions)
-    setStudents(allStudents)
+        setUser(currentUser)
+        setTasks(allTasks)
+        setSubmissions(allSubmissions)
+        setStudents(studentUsers)
+      } catch (error) {
+        console.error('Error loading teacher data:', error)
+      }
+    }
+
+    loadData()
   }, [])
 
   const handleLogout = () => {
@@ -95,7 +105,7 @@ function TeacherDashboard() {
         comments: reviewComment,
       }
 
-      saveSubmission(updatedSubmission)
+      await saveSubmission(updatedSubmission)
 
       // Update student points if approved
       if (status === "approved") {
@@ -114,21 +124,22 @@ function TeacherDashboard() {
             updatedStudent.badges.push("Eco Warrior")
           }
 
-          saveUser(updatedStudent)
+          await saveUser(updatedStudent)
 
           // Update global stats
-          const stats = getGlobalStats()
+          const stats = await getGlobalStats()
           if (task.category === "planting") {
-            updateGlobalStats({ totalSaplings: stats.totalSaplings + 1 })
+            await updateGlobalStats({ totalSaplings: stats.totalSaplings + 1 })
           } else if (task.category === "waste") {
-            updateGlobalStats({ totalWasteSaved: stats.totalWasteSaved + 5 })
+            await updateGlobalStats({ totalWasteSaved: stats.totalWasteSaved + 5 })
           }
         }
       }
 
       // Refresh data
-      const updatedSubmissions = getSubmissions()
-      const updatedStudents = getUsers().filter((u) => u.role === "student")
+      const updatedSubmissions = await getSubmissions()
+      const updatedUsers = await getUsers()
+      const updatedStudents = updatedUsers.filter((u) => u.role === "student")
       setSubmissions(updatedSubmissions)
       setStudents(updatedStudents)
       setSelectedSubmission(null)

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, TreePine, Recycle, Zap, Droplets, Users, Maximize2 } from "lucide-react"
-import { getSubmissions, getTasks, getUsers } from "@/lib/storage"
+import { getSubmissions, getTasks, getUsers } from "@/lib/storage-api"
 
 interface MapPoint {
   id: string
@@ -25,41 +25,51 @@ export function InteractiveMap() {
 
   useEffect(() => {
     // Generate dummy map points from approved submissions
-    const submissions = getSubmissions().filter((s) => s.status === "approved")
-    const tasks = getTasks()
-    const users = getUsers()
+    const loadMapData = async () => {
+      try {
+        const submissions = await getSubmissions()
+        const tasks = await getTasks()
+        const users = await getUsers()
+        
+        const approvedSubmissions = submissions.filter((s) => s.status === "approved")
 
-    const points: MapPoint[] = submissions.map((submission, index) => {
-      const task = tasks.find((t) => t.id === submission.taskId)
-      const user = users.find((u) => u.id === submission.studentId)
+        const points: MapPoint[] = approvedSubmissions.map((submission, index) => {
+          const task = tasks.find((t) => t.id === submission.taskId)
+          const user = users.find((u) => u.id === submission.studentId)
 
-      // Generate random coordinates around major cities
-      const cities = [
-        { name: "New York", lat: 40.7128, lng: -74.006 },
-        { name: "London", lat: 51.5074, lng: -0.1278 },
-        { name: "Tokyo", lat: 35.6762, lng: 139.6503 },
-        { name: "Sydney", lat: -33.8688, lng: 151.2093 },
-        { name: "São Paulo", lat: -23.5505, lng: -46.6333 },
-        { name: "Mumbai", lat: 19.076, lng: 72.8777 },
-      ]
+          // Generate random coordinates around major cities
+          const cities = [
+            { name: "New York", lat: 40.7128, lng: -74.006 },
+            { name: "London", lat: 51.5074, lng: -0.1278 },
+            { name: "Tokyo", lat: 35.6762, lng: 139.6503 },
+            { name: "Sydney", lat: -33.8688, lng: 151.2093 },
+            { name: "São Paulo", lat: -23.5505, lng: -46.6333 },
+            { name: "Mumbai", lat: 19.076, lng: 72.8777 },
+          ]
 
-      const city = cities[index % cities.length]
-      const lat = city.lat + (Math.random() - 0.5) * 0.1
-      const lng = city.lng + (Math.random() - 0.5) * 0.1
+          const city = cities[index % cities.length]
+          const lat = city.lat + (Math.random() - 0.5) * 0.1
+          const lng = city.lng + (Math.random() - 0.5) * 0.1
 
-      return {
-        id: submission.id,
-        lat,
-        lng,
-        type: task?.category || "planting",
-        title: task?.title || "Environmental Action",
-        studentName: user?.name || "Anonymous",
-        date: new Date(submission.submittedAt).toLocaleDateString(),
-        points: task?.points || 0,
+          return {
+            id: submission.id,
+            lat,
+            lng,
+            type: task?.category || "planting",
+            title: task?.title || "Environmental Action",
+            studentName: user?.name || "Anonymous",
+            date: new Date(submission.submittedAt).toLocaleDateString(),
+            points: task?.points || 0,
+          }
+        })
+
+        setMapPoints(points)
+      } catch (error) {
+        console.error('Error loading map data:', error)
       }
-    })
+    }
 
-    setMapPoints(points)
+    loadMapData()
   }, [])
 
   const filteredPoints = filter === "all" ? mapPoints : mapPoints.filter((p) => p.type === filter)
