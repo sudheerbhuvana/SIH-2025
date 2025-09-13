@@ -24,7 +24,8 @@ import {
   Calendar,
   Megaphone,
   Award,
-  TrendingUp
+  TrendingUp,
+  LogOut
 } from "lucide-react"
 import { getUsers, getSchools, createSchool, updateSchool, deleteSchool } from "@/lib/storage-api"
 import type { User, School } from "@/lib/storage-api"
@@ -111,6 +112,11 @@ function AdminDashboard() {
     totalAdmins: users.filter(u => u.role === 'admin').length
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('ecocred_current_user')
+    window.location.href = '/login'
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -130,9 +136,15 @@ function AdminDashboard() {
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage schools, users, and system settings</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage schools, users, and system settings</p>
+          </div>
+          <Button onClick={handleLogout} variant="outline" className="flex items-center space-x-2">
+            <LogOut className="h-4 w-4" />
+            <span>Logout</span>
+          </Button>
         </div>
 
         {/* Stats Overview */}

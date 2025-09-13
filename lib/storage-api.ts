@@ -15,6 +15,16 @@ export interface User {
   lessonProgress: { [lessonId: string]: LessonProgress }
 }
 
+export interface School {
+  id: string
+  name: string
+  location: string
+  description: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Task {
   id: string
   title: string
@@ -411,6 +421,33 @@ export const getImages = async (filters?: {
     return await apiCall(url)
   } catch (error) {
     console.error('Error fetching images:', error)
+    return []
+  }
+}
+
+// School rankings based on student eco points
+export const getSchoolRankings = async (limit: number = 5): Promise<Array<{school: School, totalPoints: number, studentCount: number}>> => {
+  try {
+    const users = await getUsers()
+    const schools = await getSchools()
+    
+    const schoolRankings = schools.map(school => {
+      const schoolStudents = users.filter(user => user.school === school.name && user.role === 'student')
+      const totalPoints = schoolStudents.reduce((sum, student) => sum + student.ecoPoints, 0)
+      const studentCount = schoolStudents.length
+      
+      return {
+        school,
+        totalPoints,
+        studentCount
+      }
+    }).filter(ranking => ranking.studentCount > 0)
+     .sort((a, b) => b.totalPoints - a.totalPoints)
+     .slice(0, limit)
+    
+    return schoolRankings
+  } catch (error) {
+    console.error('Error fetching school rankings:', error)
     return []
   }
 }

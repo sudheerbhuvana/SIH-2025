@@ -1,4 +1,7 @@
 import { getDatabase } from './mongodb'
+
+// Re-export getDatabase for API routes
+export { getDatabase }
 import type { User, Task, Submission, GlobalStats, LessonProgress, School, CalendarEvent, SeasonalEvent, Announcement, ImageUpload } from './types'
 
 // User management
@@ -148,10 +151,10 @@ export async function getGlobalStats(): Promise<GlobalStats> {
     
     // Return default stats if none exist
     return {
-      totalSaplings: 1247,
-      totalWasteSaved: 892,
-      totalStudents: 156,
-      totalTasks: 89,
+      totalSaplings: 0,
+      totalWasteSaved: 0,
+      totalStudents: 0,
+      totalTasks: 0,
       lastUpdated: new Date().toISOString(),
     }
   } catch (error) {
@@ -362,203 +365,16 @@ export async function initializeDemoData(): Promise<void> {
     const existingStats = await db.collection<GlobalStats>('globalStats').findOne({})
     if (!existingStats) {
       await db.collection<GlobalStats>('globalStats').insertOne({
-        totalSaplings: 23,
-        totalWasteSaved: 15,
-        totalStudents: 8,
-        totalTasks: 12,
+        totalSaplings: 0,
+        totalWasteSaved: 0,
+        totalStudents: 0,
+        totalTasks: 0,
         lastUpdated: new Date().toISOString(),
       })
     }
 
-    // Initialize demo tasks if not exists
-    const existingTasks = await db.collection<Task>('tasks').findOne({})
-    if (!existingTasks) {
-      const demoTasks: Task[] = [
-        {
-          id: "1",
-          title: "Plant a Sapling",
-          description: "Plant a tree sapling and upload a photo as evidence",
-          category: "planting",
-          points: 50,
-          createdBy: "system",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          title: "Waste Segregation",
-          description: "Properly segregate waste and document the process",
-          category: "waste",
-          points: 30,
-          createdBy: "system",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "3",
-          title: "Energy Conservation",
-          description: "Document energy-saving practices at home or school",
-          category: "energy",
-          points: 40,
-          createdBy: "system",
-          createdAt: new Date().toISOString(),
-        },
-      ]
-
-      await db.collection<Task>('tasks').insertMany(demoTasks)
-    }
-
-    // Initialize demo users if not exists
-    const existingUsers = await db.collection<User>('users').findOne({})
-    if (!existingUsers) {
-      const demoUsers: User[] = [
-        {
-          id: "student1",
-          email: "student@example.com",
-          name: "Demo Student",
-          role: "student",
-          school: "Government Senior Secondary School, Chandigarh",
-          ecoPoints: 45,
-          badges: ["First Step"],
-          streak: 3,
-          joinedAt: new Date().toISOString(),
-          completedLessons: [],
-          lessonProgress: {},
-        },
-        {
-          id: "student2",
-          email: "arjun@example.com",
-          name: "Arjun Singh",
-          role: "student",
-          school: "DAV Public School, Ludhiana",
-          ecoPoints: 120,
-          badges: ["First Step", "Eco Warrior", "Tree Planter"],
-          streak: 7,
-          joinedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          completedLessons: ["tree-planting", "waste-management"],
-          lessonProgress: {},
-        },
-        {
-          id: "student3",
-          email: "priya@example.com",
-          name: "Priya Kaur",
-          role: "student",
-          school: "Sacred Heart Convent School, Amritsar",
-          ecoPoints: 95,
-          badges: ["First Step", "Green Champion", "Energy Saver"],
-          streak: 5,
-          joinedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          completedLessons: ["energy-conservation"],
-          lessonProgress: {},
-        },
-        {
-          id: "student4",
-          email: "rohit@example.com",
-          name: "Rohit Sharma",
-          role: "student",
-          school: "St. Joseph's Senior Secondary School, Patiala",
-          ecoPoints: 78,
-          badges: ["First Step", "Water Guardian"],
-          streak: 2,
-          joinedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          completedLessons: ["water-conservation"],
-          lessonProgress: {},
-        },
-        {
-          id: "student5",
-          email: "simran@example.com",
-          name: "Simran Gill",
-          role: "student",
-          school: "Ryan International School, Mohali",
-          ecoPoints: 156,
-          badges: ["First Step", "Eco Warrior", "Tree Planter", "Streak Master", "Green Champion"],
-          streak: 12,
-          joinedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          completedLessons: ["tree-planting", "waste-management", "energy-conservation"],
-          lessonProgress: {},
-        },
-        {
-          id: "teacher1",
-          email: "teacher@example.com",
-          name: "Demo Teacher",
-          role: "teacher",
-          school: "Government Senior Secondary School, Chandigarh",
-          ecoPoints: 0,
-          badges: [],
-          streak: 0,
-          joinedAt: new Date().toISOString(),
-          completedLessons: [],
-          lessonProgress: {},
-        },
-        {
-          id: "admin1",
-          email: "admin@eco-cred.in",
-          name: "System Admin",
-          role: "admin",
-          school: "EcoCred Platform",
-          ecoPoints: 0,
-          badges: [],
-          streak: 0,
-          joinedAt: new Date().toISOString(),
-          completedLessons: [],
-          lessonProgress: {},
-        },
-      ]
-
-      await db.collection<User>('users').insertMany(demoUsers)
-    }
-
-    // Initialize demo schools if not exists
-    const existingSchools = await db.collection<School>('schools').findOne({})
-    if (!existingSchools) {
-      const demoSchools: School[] = [
-        {
-          id: "school1",
-          name: "Government Senior Secondary School, Chandigarh",
-          location: "Chandigarh, Punjab",
-          description: "Leading government school promoting environmental education",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: "school2",
-          name: "DAV Public School, Ludhiana",
-          location: "Ludhiana, Punjab",
-          description: "Private school with strong eco-friendly initiatives",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: "school3",
-          name: "Sacred Heart Convent School, Amritsar",
-          location: "Amritsar, Punjab",
-          description: "Convent school focused on holistic environmental education",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: "school4",
-          name: "St. Joseph's Senior Secondary School, Patiala",
-          location: "Patiala, Punjab",
-          description: "Catholic school with green campus initiatives",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: "school5",
-          name: "Ryan International School, Mohali",
-          location: "Mohali, Punjab",
-          description: "International school promoting sustainable practices",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ]
-
-      await db.collection<School>('schools').insertMany(demoSchools)
-    }
+  
+    
   } catch (error) {
     console.error('Error initializing demo data:', error)
     throw error
@@ -762,5 +578,33 @@ export async function deleteImageUpload(id: string): Promise<void> {
   } catch (error) {
     console.error('Error deleting image upload:', error)
     throw error
+  }
+}
+
+// School rankings based on student eco points
+export async function getSchoolRankings(limit: number = 5): Promise<Array<{school: School, totalPoints: number, studentCount: number}>> {
+  try {
+    const db = await getDatabase()
+    const users = await db.collection<User>('users').find({ role: 'student' }).toArray()
+    const schools = await db.collection<School>('schools').find({}).toArray()
+    
+    const schoolRankings = schools.map(school => {
+      const schoolStudents = users.filter(user => user.school === school.name)
+      const totalPoints = schoolStudents.reduce((sum, student) => sum + student.ecoPoints, 0)
+      const studentCount = schoolStudents.length
+      
+      return {
+        school,
+        totalPoints,
+        studentCount
+      }
+    }).filter(ranking => ranking.studentCount > 0)
+     .sort((a, b) => b.totalPoints - a.totalPoints)
+     .slice(0, limit)
+    
+    return schoolRankings
+  } catch (error) {
+    console.error('Error fetching school rankings:', error)
+    return []
   }
 }

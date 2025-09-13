@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Leaf, TreePine, Recycle, Users, Trophy, Star } from "lucide-react"
-import { getGlobalStats, initializeDemoData, getUsers } from "@/lib/storage-api"
-import type { GlobalStats, User } from "@/lib/storage-api"
+import { getGlobalStats, initializeDemoData, getUsers, getSchoolRankings } from "@/lib/storage-api"
+import type { GlobalStats, User, School } from "@/lib/storage-api"
 import Link from "next/link"
 
 export default function HomePage() {
   const [stats, setStats] = useState<GlobalStats | null>(null)
   const [topStudents, setTopStudents] = useState<User[]>([])
+  const [topSchools, setTopSchools] = useState<Array<{school: School, totalPoints: number, studentCount: number}>>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -24,11 +25,17 @@ export default function HomePage() {
         await initializeDemoData()
         const globalStats = await getGlobalStats()
         const users = await getUsers()
+        
+        // Calculate top students
         const studentUsers = users.filter((user) => user.role === "student")
         const sortedStudents = studentUsers.sort((a, b) => b.ecoPoints - a.ecoPoints).slice(0, 5)
 
+        // Get school rankings
+        const schoolRankings = await getSchoolRankings(5)
+
         setStats(globalStats)
         setTopStudents(sortedStudents)
+        setTopSchools(schoolRankings)
         setIsLoaded(true)
       } catch (error) {
         console.error('Error loading data:', error)
@@ -213,49 +220,41 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/50">
-                    <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
-                      1
+                  {topSchools.length > 0 ? (
+                    topSchools.map((ranking, index) => {
+                      const rankColors = [
+                        "bg-yellow-500", // 1st place - Gold
+                        "bg-gray-400",   // 2nd place - Silver
+                        "bg-amber-600",  // 3rd place - Bronze
+                        "bg-primary",    // 4th place
+                        "bg-blue-500"    // 5th place
+                      ]
+                      
+                      const maxPoints = topSchools[0]?.totalPoints || 1
+                      const progressValue = (ranking.totalPoints / maxPoints) * 100
+                      
+                      return (
+                        <div key={ranking.school.id} className="flex items-center space-x-4 p-3 rounded-lg bg-muted/50">
+                          <div className={`w-8 h-8 rounded-full ${rankColors[index] || "bg-gray-400"} flex items-center justify-center text-white font-bold`}>
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold">{ranking.school.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {ranking.totalPoints.toLocaleString()} eco-points • {ranking.studentCount} students
+                            </p>
+                          </div>
+                          <Progress value={progressValue} className="w-20" />
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No school rankings available yet</p>
+                      <p className="text-sm">Schools will appear here once students start earning eco-points</p>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Green Valley High School</p>
-                      <p className="text-sm text-muted-foreground">2,450 eco-points</p>
-                    </div>
-                    <Progress value={85} className="w-20" />
-                  </div>
-
-                  <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/50">
-                    <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold">
-                      2
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Eco Academy</p>
-                      <p className="text-sm text-muted-foreground">2,180 eco-points</p>
-                    </div>
-                    <Progress value={75} className="w-20" />
-                  </div>
-
-                  <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/50">
-                    <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center text-white font-bold">
-                      3
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Sustainable Learning Center</p>
-                      <p className="text-sm text-muted-foreground">1,920 eco-points</p>
-                    </div>
-                    <Progress value={65} className="w-20" />
-                  </div>
-
-                  <div className="flex items-center space-x-4 p-3 rounded-lg bg-muted/50">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                      4
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">Nature First School</p>
-                      <p className="text-sm text-muted-foreground">1,650 eco-points</p>
-                    </div>
-                    <Progress value={55} className="w-20" />
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
