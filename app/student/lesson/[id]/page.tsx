@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ArrowLeft, TreePine, Recycle, Zap, Droplets, CheckCircle } from "lucide-react"
-import { getCurrentUser, completeLesson, getUserLessonProgress } from "@/lib/storage"
-import type { User } from "@/lib/storage"
+import { getCurrentUserFromSession, completeLesson, getUserLessonProgress } from "@/lib/storage-api"
+import type { User } from "@/lib/storage-api"
 
 const lessons = {
   "tree-planting": {
@@ -393,14 +393,22 @@ function LessonContent() {
   const lesson = lessons[lessonId as keyof typeof lessons]
 
   useEffect(() => {
-    const currentUser = getCurrentUser()
-    setUser(currentUser)
+    const loadUserData = async () => {
+      try {
+        const currentUser = getCurrentUserFromSession()
+        setUser(currentUser)
 
-    if (currentUser) {
-      const lessonProgress = getUserLessonProgress(currentUser.id, lessonId)
-      setCompleted(lessonProgress.completed)
-      setProgress(lessonProgress.progress)
+        if (currentUser) {
+          const lessonProgress = await getUserLessonProgress(currentUser.id, lessonId)
+          setCompleted(lessonProgress.completed)
+          setProgress(lessonProgress.progress)
+        }
+      } catch (error) {
+        console.error('Error loading lesson data:', error)
+      }
     }
+
+    loadUserData()
   }, [lessonId])
 
   useEffect(() => {
@@ -422,11 +430,15 @@ function LessonContent() {
     )
   }
 
-  const handleCompleteLesson = () => {
+  const handleCompleteLesson = async () => {
     if (user) {
-      completeLesson(user.id, lessonId, lesson.points)
-      setCompleted(true)
-      router.push("/student?tab=lessons")
+      try {
+        await completeLesson(user.id, lessonId, lesson.points)
+        setCompleted(true)
+        router.push("/student?tab=lessons")
+      } catch (error) {
+        console.error('Error completing lesson:', error)
+      }
     }
   }
 
