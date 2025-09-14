@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -34,11 +34,7 @@ export function Calendar({ schoolId, showAddEvent = true, userRole }: CalendarPr
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadEvents()
-  }, [schoolId])
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     try {
       const calendarEvents = await getCalendarEvents(schoolId)
       setEvents(calendarEvents)
@@ -47,7 +43,11 @@ export function Calendar({ schoolId, showAddEvent = true, userRole }: CalendarPr
     } finally {
       setLoading(false)
     }
-  }
+  }, [schoolId])
+
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -34,11 +34,7 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true, 
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
 
-  useEffect(() => {
-    loadAnnouncements()
-  }, [schoolId, targetAudience])
-
-  const loadAnnouncements = async () => {
+  const loadAnnouncements = useCallback(async () => {
     try {
       const announcementData = await getAnnouncements(schoolId, targetAudience)
       setAnnouncements(announcementData)
@@ -47,7 +43,11 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true, 
     } finally {
       setLoading(false)
     }
-  }
+  }, [schoolId, targetAudience])
+
+  useEffect(() => {
+    loadAnnouncements()
+  }, [loadAnnouncements])
 
   const handleCreateAnnouncement = async (announcementData: Omit<Announcement, 'id'>) => {
     try {

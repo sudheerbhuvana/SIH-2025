@@ -131,7 +131,7 @@ function TaskSubmission() {
               <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Task Submitted!</h2>
               <p className="text-muted-foreground mb-4">
-                Your submission is now under review. You'll be notified once it's approved.
+                Your submission is now under review. You&apos;ll be notified once it&apos;s approved.
               </p>
               <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
             </CardContent>

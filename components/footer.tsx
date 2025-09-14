@@ -1,6 +1,7 @@
 "use client"
 
 import { Leaf, Heart } from "lucide-react"
+import Link from "next/link"
 
 export function Footer() {
   return (
@@ -28,18 +29,18 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Quick Links</h3>
             <div className="space-y-2 text-sm">
-              <a href="/" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <Link href="/" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 Home
-              </a>
-              <a href="/student" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              </Link>
+              <Link href="/student" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 Student Portal
-              </a>
-              <a href="/teacher" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              </Link>
+              <Link href="/teacher" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 Teacher Portal
-              </a>
-              <a href="/gallery" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              </Link>
+              <Link href="/gallery" className="block text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 Gallery
-              </a>
+              </Link>
             </div>
           </div>
 

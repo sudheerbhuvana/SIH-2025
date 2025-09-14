@@ -742,7 +742,7 @@ function TeacherDashboard() {
                                       {selectedSubmission.evidence}
                                     </a>
                                     <p className="text-xs text-muted-foreground mt-2">
-                                      Click the link above to view the student's evidence image
+                                      Click the link above to view the student&apos;s evidence image
                                     </p>
                                   </div>
                                 ) : (

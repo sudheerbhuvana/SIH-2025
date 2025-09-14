@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Navigation } from "@/components/navigation"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -72,7 +72,7 @@ function GalleryView() {
 
   useEffect(() => {
     filterImages()
-  }, [images, searchTerm, selectedCategory, selectedStatus])
+  }, [filterImages])
 
   const loadGalleryData = async () => {
     try {
@@ -115,7 +115,7 @@ function GalleryView() {
     }
   }
 
-  const filterImages = () => {
+  const filterImages = useCallback(() => {
     let filtered = images
 
     // Search filter
@@ -139,7 +139,7 @@ function GalleryView() {
     }
 
     setFilteredImages(filtered)
-  }
+  }, [images, searchTerm, selectedCategory, selectedStatus])
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -510,8 +510,8 @@ function GalleryView() {
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• Task submission record</li>
-                    <li>• Student's earned points for this task</li>
-                    <li>• Student's streak counter (decremented)</li>
+                    <li>• Student&apos;s earned points for this task</li>
+                    <li>• Student&apos;s streak counter (decremented)</li>
                     <li>• Image file from storage</li>
                     <li>• Global statistics impact</li>
                     <li>• Any badges earned from this submission</li>
