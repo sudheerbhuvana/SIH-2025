@@ -14,6 +14,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://docker.com/)
 
 
+
 </div>
 
 ---
@@ -63,7 +64,7 @@ Works seamlessly across all devices
 
 ## 🚀 Quick Start
 
-### 📋 Prerequisites
+### 📋 Prerequisites.
 
 > **Required:** Node.js 18+ | **Recommended:** Docker | **Optional:** MongoDB (local)
 
@@ -82,7 +83,7 @@ docker run -p 3000:3000 eco-cred
 # 🌐 http://localhost:3000
 ```
 
-### 💻 Local Development
+### 💻 Local Development    
 
 ```bash
 # 1. Install dependencies
