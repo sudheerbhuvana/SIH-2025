@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: "EcoCred Web - Gamified Environmental Education",
   description: "Gamified environmental education platform with verified actions and impact tracking",
   generator: "v0.app",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -20,6 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#00B15D" />
+      </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
