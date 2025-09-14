@@ -28,10 +28,10 @@ export function LoginForm() {
 
     try {
       // Hardcoded admin login for immediate access
-      if (email === "admin@eco-cred.in" && password === "123456" && activeTab === "admin") {
+      if (email === "admin@ecocred.in" && password === "praveengayfr" && activeTab === "admin") {
         const adminUser = {
           id: "admin1",
-          email: "admin@eco-cred.in",
+          email: "admin@ecocred.in",
           name: "System Admin",
           role: "admin" as const,
           school: "EcoCred Platform",
@@ -175,7 +175,7 @@ export function LoginForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@eco-cred.in"
+                  placeholder="admin@ecocred.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -202,9 +202,6 @@ export function LoginForm() {
               </Button>
             </form>
             <div className="text-center text-sm text-muted-foreground">
-              <p>Demo Admin Credentials:</p>
-              <p><strong>Email:</strong> admin@eco-cred.in</p>
-              <p><strong>Password:</strong> 123456</p>
             </div>
           </TabsContent>
         </Tabs>
