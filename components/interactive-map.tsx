@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MapPin, TreePine, Recycle, Zap, Droplets, Users, Maximize2 } from "lucide-react"
-import { getSubmissions, getTasks, getUsers } from "@/lib/storage-api"
+import { getSubmissions, getTasks, getUsers, getSchools } from "@/lib/storage-api"
 
 interface MapPoint {
   id: string
@@ -24,32 +24,46 @@ export function InteractiveMap() {
   const [filter, setFilter] = useState<string>("all")
 
   useEffect(() => {
-    // Generate dummy map points from approved submissions
+    // Generate map points from approved submissions with real data
     const loadMapData = async () => {
       try {
         const submissions = await getSubmissions()
         const tasks = await getTasks()
         const users = await getUsers()
+        const schools = await getSchools()
         
         const approvedSubmissions = submissions.filter((s) => s.status === "approved")
 
         const points: MapPoint[] = approvedSubmissions.map((submission, index) => {
           const task = tasks.find((t) => t.id === submission.taskId)
           const user = users.find((u) => u.id === submission.studentId)
+          const school = schools.find((s) => s.name === user?.school)
 
-          // Generate random coordinates around major cities
-          const cities = [
-            { name: "New York", lat: 40.7128, lng: -74.006 },
-            { name: "London", lat: 51.5074, lng: -0.1278 },
-            { name: "Tokyo", lat: 35.6762, lng: 139.6503 },
-            { name: "Sydney", lat: -33.8688, lng: 151.2093 },
-            { name: "São Paulo", lat: -23.5505, lng: -46.6333 },
+          // Use school location if available, otherwise use Indian cities as fallback
+          const indianCities = [
+            { name: "Chandigarh", lat: 30.7333, lng: 76.7794 },
             { name: "Mumbai", lat: 19.076, lng: 72.8777 },
+            { name: "Delhi", lat: 28.6139, lng: 77.209 },
+            { name: "Bangalore", lat: 12.9716, lng: 77.5946 },
+            { name: "Pune", lat: 18.5204, lng: 73.8567 },
+            { name: "Amritsar", lat: 31.634, lng: 74.8723 },
+            { name: "Ludhiana", lat: 30.9010, lng: 75.8573 },
+            { name: "Patiala", lat: 30.3398, lng: 76.3869 },
+            { name: "Mohali", lat: 30.7046, lng: 76.7179 },
           ]
 
-          const city = cities[index % cities.length]
-          const lat = city.lat + (Math.random() - 0.5) * 0.1
-          const lng = city.lng + (Math.random() - 0.5) * 0.1
+          // Try to get coordinates from school location, fallback to city-based coordinates
+          let lat, lng
+          if (school?.location) {
+            // For now, use city-based coordinates based on school location
+            const city = indianCities.find(c => school.location.includes(c.name)) || indianCities[index % indianCities.length]
+            lat = city.lat + (Math.random() - 0.5) * 0.05 // Smaller random offset for more accurate positioning
+            lng = city.lng + (Math.random() - 0.5) * 0.05
+          } else {
+            const city = indianCities[index % indianCities.length]
+            lat = city.lat + (Math.random() - 0.5) * 0.1
+            lng = city.lng + (Math.random() - 0.5) * 0.1
+          }
 
           return {
             id: submission.id,
@@ -57,7 +71,7 @@ export function InteractiveMap() {
             lng,
             type: task?.category || "planting",
             title: task?.title || "Environmental Action",
-            studentName: user?.name || "Anonymous",
+            studentName: user?.name || "Unknown User", // Better fallback than "Anonymous"
             date: new Date(submission.submittedAt).toLocaleDateString(),
             points: task?.points || 0,
           }

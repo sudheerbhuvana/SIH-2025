@@ -40,6 +40,8 @@ import {
   getCompletedLessonsCount,
 } from "@/lib/storage-api"
 import type { User, Task, Submission } from "@/lib/storage-api"
+import { Calendar } from "@/components/calendar"
+import { SeasonalEvents } from "@/components/seasonal-events"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -197,12 +199,14 @@ function TeacherDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="students">Your Students</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -380,14 +384,7 @@ function TeacherDashboard() {
                       {
                         students.filter(
                           (student) =>
-                            student.school &&
-                            [
-                              "Government Senior Secondary School, Chandigarh",
-                              "DAV Public School, Ludhiana",
-                              "Sacred Heart Convent School, Amritsar",
-                              "St. Joseph's Senior Secondary School, Patiala",
-                              "Ryan International School, Mohali",
-                            ].includes(student.school),
+                            student.school && student.school === user?.school,
                         ).length
                       }
                       )
@@ -397,27 +394,13 @@ function TeacherDashboard() {
                 <CardContent>
                   {students.filter(
                     (student) =>
-                      student.school &&
-                      [
-                        "Government Senior Secondary School, Chandigarh",
-                        "DAV Public School, Ludhiana",
-                        "Sacred Heart Convent School, Amritsar",
-                        "St. Joseph's Senior Secondary School, Patiala",
-                        "Ryan International School, Mohali",
-                      ].includes(student.school),
+                      student.school && student.school === user?.school,
                   ).length > 0 ? (
                     <div className="space-y-4">
                       {students
                         .filter(
                           (student) =>
-                            student.school &&
-                            [
-                              "Government Senior Secondary School, Chandigarh",
-                              "DAV Public School, Ludhiana",
-                              "Sacred Heart Convent School, Amritsar",
-                              "St. Joseph's Senior Secondary School, Patiala",
-                              "Ryan International School, Mohali",
-                            ].includes(student.school),
+                            student.school && student.school === user?.school,
                         )
                         .sort((a, b) => b.ecoPoints - a.ecoPoints)
                         .map((student) => {
@@ -970,6 +953,16 @@ function TeacherDashboard() {
                 )
               })}
             </div>
+          </TabsContent>
+
+          {/* Events Tab */}
+          <TabsContent value="events" className="space-y-6">
+            <SeasonalEvents userRole={user?.role} />
+          </TabsContent>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-6">
+            <Calendar schoolId={user?.school} showAddEvent={true} userRole={user?.role} />
           </TabsContent>
         </Tabs>
       </div>

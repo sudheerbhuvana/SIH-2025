@@ -24,9 +24,10 @@ import type { CalendarEvent } from "@/lib/storage-api"
 interface CalendarProps {
   schoolId?: string
   showAddEvent?: boolean
+  userRole?: string
 }
 
-export function Calendar({ schoolId, showAddEvent = true }: CalendarProps) {
+export function Calendar({ schoolId, showAddEvent = true, userRole }: CalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [showEventForm, setShowEventForm] = useState(false)
@@ -157,7 +158,7 @@ export function Calendar({ schoolId, showAddEvent = true }: CalendarProps) {
               <CalendarIcon className="h-5 w-5 text-primary" />
               <span>Calendar</span>
             </CardTitle>
-            {showAddEvent && (
+            {showAddEvent && (userRole === 'teacher' || userRole === 'admin') && (
               <Button onClick={() => setShowEventForm(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Event

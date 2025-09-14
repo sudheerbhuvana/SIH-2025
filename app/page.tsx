@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { InteractiveMap } from "@/components/interactive-map"
+import Galaxy from "@/components/galaxy"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -62,28 +63,44 @@ export default function HomePage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-green-50 to-emerald-50">
-        <div className="container mx-auto text-center">
+      <section className="relative py-20 px-4 bg-primary text-primary-foreground overflow-hidden">
+        {/* Galaxy Background */}
+        <div className="absolute inset-0 opacity-30">
+          <Galaxy 
+            density={1.5}
+            glowIntensity={0.8}
+            hueShift={0}
+            speed={0.3}
+            mouseInteraction={true}
+            transparent={true}
+            twinkleIntensity={1.0}
+            repulsionStrength={4}
+            starSpeed={0.2}
+          />
+        </div>
+        
+        {/* Content */}
+        <div className="container mx-auto text-center relative z-10">
           <div className="flex items-center justify-center mb-6">
-            <Leaf className="h-12 w-12 text-primary mr-4" />
-            <h1 className="text-4xl md:text-6xl font-bold text-primary">EcoCred Web</h1>
+            <Leaf className="h-12 w-12 text-primary-foreground mr-4" />
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground">EcoCred Web</h1>
           </div>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-primary-foreground mb-8 max-w-3xl mx-auto opacity-90">
             Gamified Environmental Education & Verified Actions Platform
           </p>
-          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-primary-foreground mb-12 max-w-2xl mx-auto opacity-80">
             Join students and teachers worldwide in making a real environmental impact through verified actions,
             interactive learning, and community engagement.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="text-lg px-8 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button asChild size="lg" className="text-lg px-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90">
               <Link href="/student">Join as Student</Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="text-lg px-8 bg-transparent border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              className="text-lg px-8 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
             >
               <Link href="/teacher">Teacher Portal</Link>
             </Button>

@@ -22,7 +22,11 @@ import {
 import { getSeasonalEvents, createSeasonalEvent } from "@/lib/storage-api"
 import type { SeasonalEvent } from "@/lib/storage-api"
 
-export function SeasonalEvents() {
+interface SeasonalEventsProps {
+  userRole?: string
+}
+
+export function SeasonalEvents({ userRole }: SeasonalEventsProps) {
   const [events, setEvents] = useState<SeasonalEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [showEventForm, setShowEventForm] = useState(false)
@@ -98,10 +102,12 @@ export function SeasonalEvents() {
           </h2>
           <p className="text-muted-foreground">Special events with exclusive rewards and community challenges</p>
         </div>
-        <Button onClick={() => setShowEventForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Event
-        </Button>
+        {(userRole === 'teacher' || userRole === 'admin') && (
+          <Button onClick={() => setShowEventForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Event
+          </Button>
+        )}
       </div>
 
       {/* Active Events */}
@@ -126,22 +132,24 @@ export function SeasonalEvents() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingEvent(event)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {/* Handle delete */}}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {(userRole === 'teacher' || userRole === 'admin') && (
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingEvent(event)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {/* Handle delete */}}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>

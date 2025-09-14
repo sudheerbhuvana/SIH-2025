@@ -206,7 +206,7 @@ function StudentDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="lessons">Lessons</TabsTrigger>
@@ -485,12 +485,12 @@ function StudentDashboard() {
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
-            <Calendar schoolId={user.school} showAddEvent={false} />
+            <Calendar schoolId={user.school} showAddEvent={false} userRole={user.role} />
           </TabsContent>
 
           {/* Events Tab */}
           <TabsContent value="events" className="space-y-6">
-            <SeasonalEvents />
+            <SeasonalEvents userRole={user.role} />
           </TabsContent>
 
           {/* Announcements Tab */}

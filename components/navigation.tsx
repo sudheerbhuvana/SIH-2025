@@ -136,7 +136,7 @@ export function Navigation() {
               {/* Footer */}
               <div className="mt-auto pt-4 border-t">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>© 2024 EcoCred</span>
+                  <span>© 2025 EcoCred</span>
                   <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span>Online</span>
