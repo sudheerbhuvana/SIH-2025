@@ -51,7 +51,7 @@ export function Footer() {
                 <div className="text-primary-foreground/80">Sudheer</div>
                 <div className="text-primary-foreground/80">Nischal</div>
                 <div className="text-primary-foreground/80">Praveen</div>
-                <div className="text-primary-foreground/80">Kushal</div>
+                <div className="text-primary-foreground/80">Kushaal</div>
                 <div className="text-primary-foreground/80">Sindhuja</div>
                 <div className="text-primary-foreground/80">Sainandhan</div>
               </div>
