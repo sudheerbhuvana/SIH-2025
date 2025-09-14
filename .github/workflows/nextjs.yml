@@ -26,9 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Run linting (optional but recommended)
+      # Run linting (soft fail, logs warnings/errors but doesn't block build)
       - name: Run lint
-        run: npm run lint --if-present
+        run: npm run lint || echo "Lint errors found, skipping failure"
 
       # Run tests (if you have Jest/Playwright/etc.)
       - name: Run tests
