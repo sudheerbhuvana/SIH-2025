@@ -11,6 +11,8 @@ import {
 } from '@/lib/database'
 import { deleteImage } from '@/lib/minio'
 
+export const dynamic = 'force-dynamic'
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

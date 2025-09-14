@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUsers, saveUser, getCurrentUser, getUserByEmail } from '@/lib/database'
 import type { User } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const users = await getUsers()

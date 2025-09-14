@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTasks, saveTask, getTaskById } from '@/lib/database'
 import type { Task } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const taskId = searchParams.get('taskId')
 
     if (taskId) {

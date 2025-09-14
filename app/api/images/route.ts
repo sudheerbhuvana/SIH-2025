@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getImageUploads } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const uploadedBy = searchParams.get('uploadedBy') || undefined
     const taskId = searchParams.get('taskId') || undefined
     const submissionId = searchParams.get('submissionId') || undefined

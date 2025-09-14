@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAnnouncements, createAnnouncement } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const schoolId = searchParams.get('schoolId') || undefined
     const targetAudience = searchParams.get('targetAudience') || undefined
     const announcements = await getAnnouncements(schoolId, targetAudience)

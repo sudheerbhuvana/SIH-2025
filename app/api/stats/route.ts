@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGlobalStats, updateGlobalStats } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const stats = await getGlobalStats()

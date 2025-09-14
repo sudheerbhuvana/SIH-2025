@@ -70,10 +70,6 @@ function GalleryView() {
     loadGalleryData()
   }, [])
 
-  useEffect(() => {
-    filterImages()
-  }, [filterImages])
-
   const loadGalleryData = async () => {
     try {
       const [submissions, tasks, users, imagesResponse] = await Promise.all([
@@ -83,14 +79,26 @@ function GalleryView() {
         fetch('/api/images?isPublic=true').then(res => res.json())
       ])
 
-      const galleryImages: GalleryImage[] = imagesResponse
+      console.log('Gallery Debug:', {
+        submissions: submissions.length,
+        tasks: tasks.length,
+        users: users.length,
+        imagesResponse: imagesResponse.length,
+        imagesResponseData: imagesResponse
+      })
+
+      // Create gallery images from both imageUploads and submissions with evidence
+      const galleryImages: GalleryImage[] = []
+      
+      // Add images from imageUploads collection
+      imagesResponse
         .filter((image: any) => image.isPublic)
-        .map((image: any) => {
+        .forEach((image: any) => {
           const submission = submissions.find(s => s.evidence === image.url)
           const task = tasks.find(t => t.id === image.taskId || (submission && t.id === submission.taskId))
           const user = users.find(u => u.id === image.uploadedBy || (submission && u.id === submission.studentId))
           
-          return {
+          galleryImages.push({
             id: image.id,
             url: image.url,
             title: task?.title || 'Unknown Task',
@@ -103,9 +111,41 @@ function GalleryView() {
             studentName: user?.name || 'Unknown User',
             taskTitle: task?.title || 'Unknown Task',
             submissionId: submission?.id
+          })
+        })
+
+      // Add images from submissions that have evidence (image URLs)
+      submissions
+        .filter(submission => submission.evidence && submission.status === 'approved')
+        .forEach(submission => {
+          const task = tasks.find(t => t.id === submission.taskId)
+          const user = users.find(u => u.id === submission.studentId)
+          
+          // Check if this image is already added from imageUploads
+          const alreadyExists = galleryImages.some(img => img.url === submission.evidence)
+          
+          if (!alreadyExists && task) {
+            galleryImages.push({
+              id: submission.id,
+              url: submission.evidence,
+              title: task.title,
+              description: submission.description || '',
+              uploadedBy: user?.name || 'Unknown User',
+              uploadedAt: submission.submittedAt,
+              category: task.category,
+              location: submission.location || '',
+              status: submission.status,
+              studentName: user?.name || 'Unknown User',
+              taskTitle: task.title,
+              submissionId: submission.id
+            })
           }
         })
-        .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+
+      // Sort by upload date
+      galleryImages.sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+
+      console.log('Processed gallery images:', galleryImages.length, galleryImages)
 
       setImages(galleryImages)
     } catch (error) {
@@ -115,7 +155,7 @@ function GalleryView() {
     }
   }
 
-  const filterImages = useCallback(() => {
+  const filterImages = () => {
     let filtered = images
 
     // Search filter
@@ -139,6 +179,10 @@ function GalleryView() {
     }
 
     setFilteredImages(filtered)
+  }
+
+  useEffect(() => {
+    filterImages()
   }, [images, searchTerm, selectedCategory, selectedStatus])
 
   const getCategoryIcon = (category: string) => {

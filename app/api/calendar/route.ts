@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCalendarEvents, createCalendarEvent } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const schoolId = searchParams.get('schoolId') || undefined
     const events = await getCalendarEvents(schoolId)
     return NextResponse.json(events)

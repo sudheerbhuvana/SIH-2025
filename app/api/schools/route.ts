@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSchools, createSchool } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const schools = await getSchools()
