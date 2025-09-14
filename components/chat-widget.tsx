@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageCircle, Send, X, Bot, User, Sparkles, Leaf, Zap } from "lucide-react"
+import { MessageCircle, Send, X, Bot, User, Sparkles, Leaf, Zap, Trash2, Minus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface Message {
@@ -184,7 +184,7 @@ export default function ChatWidget() {
                 className="h-8 w-8 p-0 text-white hover:bg-white/20"
                 title="Clear chat"
               >
-                <X className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -193,7 +193,7 @@ export default function ChatWidget() {
                 className="h-8 w-8 p-0 text-white hover:bg-white/20"
                 title="Close chat"
               >
-                <X className="h-4 w-4" />
+                <Minus className="h-4 w-4" />
               </Button>
             </div>
           </div>
