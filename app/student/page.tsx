@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
+import { Footer } from "@/components/footer"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -43,6 +44,7 @@ import { Calendar } from "@/components/calendar"
 import { SeasonalEvents } from "@/components/seasonal-events"
 import { Announcements } from "@/components/announcements"
 import { ProfileCard } from "@/components/avatar"
+import { StudentProfile } from "@/components/student-profile"
 
 export default function StudentPortal() {
   return (
@@ -208,6 +210,7 @@ function StudentDashboard() {
         <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className="w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="progress">Progress</TabsTrigger>
             <TabsTrigger value="lessons">Lessons</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
@@ -478,6 +481,11 @@ function StudentDashboard() {
             <Leaderboard />
           </TabsContent>
 
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <StudentProfile user={user} onUpdate={setUser} />
+          </TabsContent>
+
           {/* Progress Tab */}
           <TabsContent value="progress" className="space-y-6">
             <ProgressTracker />
@@ -495,10 +503,13 @@ function StudentDashboard() {
 
           {/* Announcements Tab */}
           <TabsContent value="announcements" className="space-y-6">
-            <Announcements schoolId={user.school} targetAudience="students" showAddButton={false} />
+            <Announcements schoolId={user.school} targetAudience="students" showAddButton={false} userRole={user.role} />
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

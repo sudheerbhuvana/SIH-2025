@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
+import { Footer } from "@/components/footer"
 import { AuthGuard } from "@/components/auth/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,7 @@ import {
 import type { User, Task, Submission } from "@/lib/storage-api"
 import { Calendar } from "@/components/calendar"
 import { SeasonalEvents } from "@/components/seasonal-events"
+import { Announcements } from "@/components/announcements"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -206,6 +208,7 @@ function TeacherDashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="announcements">Announcements</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
@@ -960,12 +963,20 @@ function TeacherDashboard() {
             <SeasonalEvents userRole={user?.role} />
           </TabsContent>
 
+          {/* Announcements Tab */}
+          <TabsContent value="announcements" className="space-y-6">
+            <Announcements schoolId={user?.school} targetAudience="students" showAddButton={true} userRole={user?.role} />
+          </TabsContent>
+
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
             <Calendar schoolId={user?.school} showAddEvent={true} userRole={user?.role} />
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

@@ -13,6 +13,10 @@ export interface User {
   joinedAt: string
   completedLessons: string[]
   lessonProgress: { [lessonId: string]: LessonProgress }
+  bio?: string
+  level?: number
+  createdAt?: string
+  lastActive?: string
 }
 
 export interface School {
@@ -164,6 +168,18 @@ export const getSubmissions = async (): Promise<Submission[]> => {
   }
 }
 
+export const deleteSubmission = async (id: string): Promise<any> => {
+  try {
+    const response = await apiCall(`/api/submissions/${id}`, {
+      method: 'DELETE',
+    })
+    return response
+  } catch (error) {
+    console.error('Error deleting submission:', error)
+    throw error
+  }
+}
+
 export const saveSubmission = async (submission: Submission): Promise<void> => {
   try {
     await apiCall('/api/submissions', {
@@ -271,19 +287,34 @@ export const initializeDemoData = async (): Promise<void> => {
   }
 }
 
-// Session management (still using localStorage for session data)
+// Wipe all data from MongoDB
+export const wipeAllData = async (): Promise<void> => {
+  try {
+    await apiCall('/api/wipe-data', {
+      method: 'DELETE',
+    })
+  } catch (error) {
+    console.error('Error wiping data:', error)
+    throw error
+  }
+}
+
+// Session management - using server-side sessions instead of localStorage
 export const setCurrentUser = (user: User | null): void => {
+  // This will be handled by server-side session management
+  // For now, we'll use a simple approach but this should be replaced with proper session handling
   if (typeof window === "undefined") return
   if (user) {
-    localStorage.setItem("ecocred_current_user", JSON.stringify(user))
+    // Store in sessionStorage instead of localStorage for better security
+    sessionStorage.setItem("ecocred_current_user", JSON.stringify(user))
   } else {
-    localStorage.removeItem("ecocred_current_user")
+    sessionStorage.removeItem("ecocred_current_user")
   }
 }
 
 export const getCurrentUserFromSession = (): User | null => {
   if (typeof window === "undefined") return null
-  const user = localStorage.getItem("ecocred_current_user")
+  const user = sessionStorage.getItem("ecocred_current_user")
   return user ? JSON.parse(user) : null
 }
 
@@ -373,6 +404,29 @@ export const createSeasonalEvent = async (eventData: any): Promise<void> => {
     })
   } catch (error) {
     console.error('Error creating seasonal event:', error)
+    throw error
+  }
+}
+
+export const updateSeasonalEvent = async (id: string, eventData: any): Promise<void> => {
+  try {
+    await apiCall(`/api/seasonal-events/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(eventData),
+    })
+  } catch (error) {
+    console.error('Error updating seasonal event:', error)
+    throw error
+  }
+}
+
+export const deleteSeasonalEvent = async (id: string): Promise<void> => {
+  try {
+    await apiCall(`/api/seasonal-events/${id}`, {
+      method: 'DELETE',
+    })
+  } catch (error) {
+    console.error('Error deleting seasonal event:', error)
     throw error
   }
 }

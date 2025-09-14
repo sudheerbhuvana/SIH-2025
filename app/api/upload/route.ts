@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       fileSize: file.size,
       contentType: file.type,
       uploadedBy,
+      uploadedAt: new Date().toISOString(),
       taskId,
       submissionId,
       isPublic: true

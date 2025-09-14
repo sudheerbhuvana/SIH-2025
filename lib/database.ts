@@ -115,6 +115,19 @@ export async function saveSubmission(submission: Submission): Promise<void> {
   }
 }
 
+export async function deleteSubmission(id: string): Promise<void> {
+  try {
+    const db = await getDatabase()
+    const result = await db.collection<Submission>('submissions').deleteOne({ id })
+    if (result.deletedCount === 0) {
+      throw new Error('Submission not found')
+    }
+  } catch (error) {
+    console.error('Error deleting submission:', error)
+    throw error
+  }
+}
+
 export async function getSubmissionsByStudent(studentId: string): Promise<Submission[]> {
   try {
     const db = await getDatabase()
@@ -124,6 +137,17 @@ export async function getSubmissionsByStudent(studentId: string): Promise<Submis
   } catch (error) {
     console.error('Error fetching submissions by student:', error)
     return []
+  }
+}
+
+export async function getSubmissionById(id: string): Promise<Submission | null> {
+  try {
+    const db = await getDatabase()
+    const submission = await db.collection<Submission>('submissions').findOne({ id })
+    return submission ? { ...submission, _id: undefined } : null
+  } catch (error) {
+    console.error('Error fetching submission by ID:', error)
+    return null
   }
 }
 
@@ -488,6 +512,41 @@ export async function createSeasonalEvent(eventData: Omit<SeasonalEvent, 'id'>):
     return event
   } catch (error) {
     console.error('Error creating seasonal event:', error)
+    throw error
+  }
+}
+
+export async function updateSeasonalEvent(id: string, eventData: Partial<SeasonalEvent>): Promise<SeasonalEvent> {
+  try {
+    const db = await getDatabase()
+    const updateData = {
+      ...eventData,
+      updatedAt: new Date().toISOString()
+    }
+    const result = await db.collection<SeasonalEvent>('seasonalEvents').findOneAndUpdate(
+      { id },
+      { $set: updateData },
+      { returnDocument: 'after' }
+    )
+    if (!result) {
+      throw new Error('Seasonal event not found')
+    }
+    return result
+  } catch (error) {
+    console.error('Error updating seasonal event:', error)
+    throw error
+  }
+}
+
+export async function deleteSeasonalEvent(id: string): Promise<void> {
+  try {
+    const db = await getDatabase()
+    const result = await db.collection<SeasonalEvent>('seasonalEvents').deleteOne({ id })
+    if (result.deletedCount === 0) {
+      throw new Error('Seasonal event not found')
+    }
+  } catch (error) {
+    console.error('Error deleting seasonal event:', error)
     throw error
   }
 }

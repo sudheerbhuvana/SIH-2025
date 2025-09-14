@@ -239,11 +239,11 @@ export default function Galaxy({
       gl.clearColor(0, 0, 0, 1);
     }
 
-    let program;
+    let program: any;
 
     function resize() {
       const scale = 1;
-      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
+      renderer.setSize((ctn as any).offsetWidth * scale, (ctn as any).offsetHeight * scale);
       if (program) {
         program.uniforms.uResolution.value = new Color(
           gl.canvas.width,
@@ -286,9 +286,9 @@ export default function Galaxy({
     });
 
     const mesh = new Mesh(gl, { geometry, program });
-    let animateId;
+    let animateId: any;
 
-    function update(t) {
+    function update(t: any) {
       animateId = requestAnimationFrame(update);
       if (!disableAnimation) {
         program.uniforms.uTime.value = t * 0.001;
@@ -308,10 +308,10 @@ export default function Galaxy({
       renderer.render({ scene: mesh });
     }
     animateId = requestAnimationFrame(update);
-    ctn.appendChild(gl.canvas);
+    (ctn as any).appendChild(gl.canvas);
 
-    function handleMouseMove(e) {
-      const rect = ctn.getBoundingClientRect();
+    function handleMouseMove(e: any) {
+      const rect = (ctn as any).getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
       targetMousePos.current = { x, y };
@@ -327,20 +327,20 @@ export default function Galaxy({
     }
 
     if (mouseInteraction) {
-      ctn.addEventListener('mousemove', handleMouseMove);
-      ctn.addEventListener('mouseenter', handleMouseEnter);
-      ctn.addEventListener('mouseleave', handleMouseLeave);
+      (ctn as any).addEventListener('mousemove', handleMouseMove);
+      (ctn as any).addEventListener('mouseenter', handleMouseEnter);
+      (ctn as any).addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener('resize', resize);
       if (mouseInteraction) {
-        ctn.removeEventListener('mousemove', handleMouseMove);
-        ctn.removeEventListener('mouseenter', handleMouseEnter);
-        ctn.removeEventListener('mouseleave', handleMouseLeave);
+        (ctn as any).removeEventListener('mousemove', handleMouseMove);
+        (ctn as any).removeEventListener('mouseenter', handleMouseEnter);
+        (ctn as any).removeEventListener('mouseleave', handleMouseLeave);
       }
-      ctn.removeChild(gl.canvas);
+      (ctn as any).removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, [

@@ -19,8 +19,8 @@ import {
   Sparkles,
   Crown
 } from "lucide-react"
-import { getSeasonalEvents, createSeasonalEvent } from "@/lib/storage-api"
-import type { SeasonalEvent } from "@/lib/storage-api"
+import { getSeasonalEvents, createSeasonalEvent, updateSeasonalEvent, deleteSeasonalEvent } from "@/lib/storage-api"
+import type { SeasonalEvent } from "@/lib/types"
 
 interface SeasonalEventsProps {
   userRole?: string
@@ -54,6 +54,29 @@ export function SeasonalEvents({ userRole }: SeasonalEventsProps) {
       setShowEventForm(false)
     } catch (error) {
       console.error('Error creating seasonal event:', error)
+    }
+  }
+
+  const handleUpdateEvent = async (eventData: Omit<SeasonalEvent, 'id'>) => {
+    try {
+      if (editingEvent) {
+        await updateSeasonalEvent(editingEvent.id, eventData)
+        await loadEvents()
+        setEditingEvent(null)
+      }
+    } catch (error) {
+      console.error('Error updating seasonal event:', error)
+    }
+  }
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+        await deleteSeasonalEvent(eventId)
+        await loadEvents()
+      }
+    } catch (error) {
+      console.error('Error deleting seasonal event:', error)
     }
   }
 
@@ -144,7 +167,7 @@ export function SeasonalEvents({ userRole }: SeasonalEventsProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {/* Handle delete */}}
+                        onClick={() => handleDeleteEvent(event.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -220,12 +243,17 @@ export function SeasonalEvents({ userRole }: SeasonalEventsProps) {
             <Gift className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Seasonal Events</h3>
             <p className="text-muted-foreground mb-4">
-              Create exciting seasonal events to boost community engagement and provide special rewards!
+              {userRole === 'teacher' || userRole === 'admin' 
+                ? 'Create exciting seasonal events to boost community engagement and provide special rewards!'
+                : 'No seasonal events available at the moment. Check back later for exciting community events!'
+              }
             </p>
-            <Button onClick={() => setShowEventForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Event
-            </Button>
+            {(userRole === 'teacher' || userRole === 'admin') && (
+              <Button onClick={() => setShowEventForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Event
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
@@ -243,7 +271,7 @@ export function SeasonalEvents({ userRole }: SeasonalEventsProps) {
       {editingEvent && (
         <SeasonalEventForm
           event={editingEvent}
-          onSave={(data) => {/* Handle update */}}
+          onSave={handleUpdateEvent}
           onCancel={() => setEditingEvent(null)}
         />
       )}
@@ -282,7 +310,8 @@ function SeasonalEventForm({
     onSave({
       ...formData,
       startDate: new Date(formData.startDate).toISOString(),
-      endDate: new Date(formData.endDate).toISOString()
+      endDate: new Date(formData.endDate).toISOString(),
+      createdAt: event?.createdAt || new Date().toISOString()
     })
   }
 
@@ -304,7 +333,7 @@ function SeasonalEventForm({
       ...formData,
       rewards: {
         ...formData.rewards,
-        badges: formData.rewards.badges.filter((_, i) => i !== index)
+        badges: formData.rewards.badges.filter((_: string, i: number) => i !== index)
       }
     })
   }
@@ -327,7 +356,7 @@ function SeasonalEventForm({
       ...formData,
       rewards: {
         ...formData.rewards,
-        specialItems: formData.rewards.specialItems.filter((_, i) => i !== index)
+        specialItems: formData.rewards.specialItems.filter((_: string, i: number) => i !== index)
       }
     })
   }
@@ -418,7 +447,7 @@ function SeasonalEventForm({
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {formData.rewards.badges.map((badge, index) => (
+                {formData.rewards.badges.map((badge: string, index: number) => (
                   <Badge key={index} variant="secondary" className="flex items-center space-x-1">
                     <span>{badge}</span>
                     <button
@@ -448,7 +477,7 @@ function SeasonalEventForm({
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {formData.rewards.specialItems.map((item, index) => (
+                {formData.rewards.specialItems.map((item: string, index: number) => (
                   <Badge key={index} variant="outline" className="flex items-center space-x-1">
                     <span>{item}</span>
                     <button

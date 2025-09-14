@@ -19,7 +19,7 @@ import {
   PartyPopper
 } from "lucide-react"
 import { getCalendarEvents, createCalendarEvent } from "@/lib/storage-api"
-import type { CalendarEvent } from "@/lib/storage-api"
+import type { CalendarEvent } from "@/lib/types"
 
 interface CalendarProps {
   schoolId?: string
@@ -323,6 +323,7 @@ function EventForm({
     onSave({
       ...formData,
       schoolId,
+      createdAt: new Date().toISOString(),
       startDate: new Date(formData.startDate).toISOString(),
       endDate: new Date(formData.endDate).toISOString()
     })

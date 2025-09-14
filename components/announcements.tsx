@@ -19,16 +19,17 @@ import {
   CheckCircle,
   X
 } from "lucide-react"
-import { getAnnouncements, createAnnouncement } from "@/lib/storage-api"
-import type { Announcement } from "@/lib/storage-api"
+import { getAnnouncements, createAnnouncement, getCurrentUserFromSession } from "@/lib/storage-api"
+import type { Announcement } from "@/lib/types"
 
 interface AnnouncementsProps {
   schoolId?: string
   targetAudience?: string
   showAddButton?: boolean
+  userRole?: string
 }
 
-export function Announcements({ schoolId, targetAudience, showAddButton = true }: AnnouncementsProps) {
+export function Announcements({ schoolId, targetAudience, showAddButton = true, userRole }: AnnouncementsProps) {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -117,7 +118,7 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true }
           </h2>
           <p className="text-muted-foreground">Important updates and motivational messages</p>
         </div>
-        {showAddButton && (
+        {showAddButton && (userRole === 'teacher' || userRole === 'admin') && (
           <Button onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Announcement
@@ -135,7 +136,7 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true }
               <p className="text-muted-foreground mb-4">
                 {showAddButton ? 'Create your first announcement to keep everyone informed!' : 'No announcements available at the moment.'}
               </p>
-              {showAddButton && (
+              {showAddButton && (userRole === 'teacher' || userRole === 'admin') && (
                 <Button onClick={() => setShowForm(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Announcement
@@ -179,7 +180,7 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true }
                     </div>
                   </div>
                   
-                  {showAddButton && (
+                  {showAddButton && (userRole === 'teacher' || userRole === 'admin') && (
                     <div className="flex space-x-2 ml-4">
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
@@ -203,6 +204,7 @@ export function Announcements({ schoolId, targetAudience, showAddButton = true }
           onCancel={() => setShowForm(false)}
           schoolId={schoolId}
           targetAudience={targetAudience}
+          userRole={userRole}
         />
       )}
     </div>
@@ -214,18 +216,21 @@ function AnnouncementForm({
   onSave, 
   onCancel, 
   schoolId,
-  targetAudience
+  targetAudience,
+  userRole
 }: { 
   onSave: (data: Omit<Announcement, 'id'>) => void
   onCancel: () => void
   schoolId?: string
   targetAudience?: string
+  userRole?: string
 }) {
+  const currentUser = getCurrentUserFromSession()
   const [formData, setFormData] = useState({
     title: '',
     message: '',
-    authorId: 'admin', // This should come from current user context
-    authorName: 'Admin', // This should come from current user context
+    authorId: currentUser?.id || 'admin',
+    authorName: currentUser?.name || 'Admin',
     schoolId: schoolId || '',
     targetAudience: targetAudience || 'all' as Announcement['targetAudience'],
     priority: 'medium' as Announcement['priority'],
@@ -237,6 +242,9 @@ function AnnouncementForm({
     e.preventDefault()
     onSave({
       ...formData,
+      targetAudience: formData.targetAudience as Announcement['targetAudience'],
+      priority: formData.priority as Announcement['priority'],
+      createdAt: new Date().toISOString(),
       expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : undefined
     })
   }

@@ -83,7 +83,7 @@ function ProfileView() {
       setIsEditing(false)
       
       // Update session
-      localStorage.setItem('ecocred_current_user', JSON.stringify(updatedUser))
+      sessionStorage.setItem('ecocred_current_user', JSON.stringify(updatedUser))
       
       alert('Profile updated successfully!')
     } catch (error) {

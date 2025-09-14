@@ -14,7 +14,7 @@ import {
   Building2, 
   Users, 
   GraduationCap, 
-  User, 
+  User as UserIcon, 
   Plus, 
   Edit, 
   Trash2, 
@@ -27,7 +27,7 @@ import {
   TrendingUp,
   LogOut
 } from "lucide-react"
-import { getUsers, getSchools, createSchool, updateSchool, deleteSchool } from "@/lib/storage-api"
+import { getUsers, getSchools, createSchool, updateSchool, deleteSchool, wipeAllData } from "@/lib/storage-api"
 import type { User, School } from "@/lib/storage-api"
 import { SchoolDataList } from "@/components/school-data-list"
 
@@ -113,8 +113,23 @@ function AdminDashboard() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('ecocred_current_user')
+    sessionStorage.removeItem('ecocred_current_user')
     window.location.href = '/login'
+  }
+
+  const handleWipeData = async () => {
+    if (confirm('⚠️ WARNING: This will permanently delete ALL data from MongoDB including users, tasks, submissions, and all other data. This action cannot be undone. Are you absolutely sure?')) {
+      if (confirm('This is your final warning. Click OK to permanently delete ALL data.')) {
+        try {
+          await wipeAllData()
+          alert('All data has been wiped from MongoDB. The page will reload.')
+          window.location.reload()
+        } catch (error) {
+          console.error('Error wiping data:', error)
+          alert('Error wiping data. Please try again.')
+        }
+      }
+    }
   }
 
   if (loading) {
@@ -141,10 +156,16 @@ function AdminDashboard() {
             <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage schools, users, and system settings</p>
           </div>
-          <Button onClick={handleLogout} variant="outline" className="flex items-center space-x-2">
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={handleWipeData} variant="destructive" className="flex items-center space-x-2">
+              <Trash2 className="h-4 w-4" />
+              <span>Wipe All Data</span>
+            </Button>
+            <Button onClick={handleLogout} variant="outline" className="flex items-center space-x-2">
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -185,7 +206,7 @@ function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Teachers</CardTitle>
-              <User className="h-4 w-4 text-orange-600" />
+              <UserIcon className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">{stats.totalTeachers}</div>
@@ -456,7 +477,11 @@ function SchoolForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(formData)
+    onSave({
+      ...formData,
+      createdAt: school?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    })
   }
 
   return (

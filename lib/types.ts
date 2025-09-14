@@ -15,6 +15,10 @@ export interface User {
   lessonProgress: { [lessonId: string]: LessonProgress }
   profilePicture?: string
   avatar?: string
+  bio?: string
+  level?: number
+  createdAt?: string
+  lastActive?: string
 }
 
 export interface Task {

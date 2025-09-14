@@ -13,7 +13,7 @@ import {
   Search, 
   Filter,
   Calendar,
-  User,
+  User as UserIcon,
   MapPin,
   TreePine,
   Recycle,
@@ -21,9 +21,11 @@ import {
   Droplets,
   Eye,
   Download,
-  X
+  X,
+  Trash2,
+  AlertTriangle
 } from "lucide-react"
-import { getSubmissions, getTasks, getUsers } from "@/lib/storage-api"
+import { getSubmissions, getTasks, getUsers, deleteSubmission, getCurrentUserFromSession } from "@/lib/storage-api"
 import type { Submission, Task, User } from "@/lib/storage-api"
 import { ImageGallery } from "@/components/image-upload"
 
@@ -39,6 +41,7 @@ interface GalleryImage {
   status: string
   studentName: string
   taskTitle: string
+  submissionId?: string
 }
 
 export default function GalleryPage() {
@@ -57,6 +60,11 @@ function GalleryView() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<GalleryImage | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  
+  const currentUser = getCurrentUserFromSession()
+  const isAdmin = currentUser?.role === 'admin'
 
   useEffect(() => {
     loadGalleryData()
@@ -93,10 +101,11 @@ function GalleryView() {
             location: submission?.location || '',
             status: submission?.status || 'unknown',
             studentName: user?.name || 'Unknown User',
-            taskTitle: task?.title || 'Unknown Task'
+            taskTitle: task?.title || 'Unknown Task',
+            submissionId: submission?.id
           }
         })
-        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+        .sort((a: any, b: any) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
 
       setImages(galleryImages)
     } catch (error) {
@@ -157,6 +166,38 @@ function GalleryView() {
         return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const handleDeleteImage = async (image: GalleryImage) => {
+    if (!image.submissionId) {
+      console.error('No submission ID found for image')
+      alert('Error: No submission ID found for this image.')
+      return
+    }
+
+    setDeleting(true)
+    try {
+      console.log('Attempting to delete submission:', image.submissionId)
+      const response = await deleteSubmission(image.submissionId)
+      console.log('Delete response:', response)
+      
+      // Show success message with details
+      if (response && response.pointsDeducted) {
+        alert(`Task submission deleted successfully!\n\n- ${response.pointsDeducted} points deducted from student\n- Student stats updated\n- Global statistics updated\n- Image permanently removed from storage`)
+      } else {
+        alert('Task submission deleted successfully!')
+      }
+      
+      // Reload the gallery data
+      await loadGalleryData()
+      setDeleteConfirm(null)
+    } catch (error) {
+      console.error('Error deleting submission:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to delete the task.\n\nError: ${errorMessage}\n\nPlease check the console for more details and try again.`)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -321,6 +362,21 @@ function GalleryView() {
                     {image.status}
                   </Badge>
                 </div>
+                {isAdmin && image.status === 'approved' && (
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setDeleteConfirm(image)
+                      }}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                   <Eye className="h-8 w-8 text-white opacity-0 hover:opacity-100 transition-opacity" />
                 </div>
@@ -416,8 +472,82 @@ function GalleryView() {
                         <Download className="h-4 w-4 mr-2" />
                         View Full Size
                       </Button>
+                      {isAdmin && selectedImage.status === 'approved' && (
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedImage(null)
+                            setDeleteConfirm(selectedImage)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span>Delete Task Submission</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-lg">
+                  <p className="text-sm font-medium text-destructive mb-2">
+                    ⚠️ This action will permanently delete:
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Task submission record</li>
+                    <li>• Student's earned points for this task</li>
+                    <li>• Student's streak counter (decremented)</li>
+                    <li>• Image file from storage</li>
+                    <li>• Global statistics impact</li>
+                    <li>• Any badges earned from this submission</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="font-medium text-sm">{deleteConfirm.title}</p>
+                  <p className="text-xs text-muted-foreground">By {deleteConfirm.studentName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(deleteConfirm.uploadedAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    Category: {deleteConfirm.category}
+                  </p>
+                </div>
+                
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. The student will lose all points and progress associated with this submission.
+                </p>
+                
+                <div className="flex space-x-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteConfirm(null)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDeleteImage(deleteConfirm)}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Permanently'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
