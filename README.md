@@ -30,16 +30,16 @@ EcoCred Web is a **comprehensive gamified environmental education platform** tha
 <td width="50%">
 
 **🎮 Gamified Learning**  
-Points, badges, leaderboards, and progress tracking
+Points, badges, leaderboards, and progress tracking.
 
 **📚 Interactive Lessons**  
-Engaging environmental education content
+Engaging environmental education content.
 
 **🌍 Real-World Tasks**  
-Verified eco-actions with impact measurement
+Verified eco-actions with impact measurement.
 
 **🤖 AI Chat Assistant**  
-24/7 environmental guidance and support
+24/7 environmental guidance and support.
 
 </td>
 <td width="50%">
